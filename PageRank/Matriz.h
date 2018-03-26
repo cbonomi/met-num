@@ -13,12 +13,11 @@ private:
     int** mt;
 
 public:
-    int m, n;
-    Matriz(int m, int n);
+    int sizeColumna, sizeFila;
+    Matriz(int vn, int vm);
 
     void set(int i, int j, int valor);
     int get(int i, int j);
-
     ~Matriz();
 
 };

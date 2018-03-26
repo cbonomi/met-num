@@ -5,19 +5,19 @@
 
 using namespace std;
 
-Matriz::Matriz(int vm, int vn) {
-    m = vm;
-    n = vn;
+Matriz::Matriz(int vn, int vm) {
+    sizeColumna = vn;
+    sizeFila = vm;//(i,j) seria fila i y columna j, como siempre
 
-    mt = new int*[n];
+    mt = new int*[sizeFila];
 
-    for (int i=0; i<n; i++) {
-        mt[i] = new int[m];
+    for (int i=0; i<sizeFila; i++) {
+        mt[i] = new int[sizeColumna];
     }
 }
 
 Matriz::~Matriz(){
-    for(int i=0; i<n; i++) {
+    for(int i=0; i<sizeFila; i++) {
         delete[] mt[i];
     }
     delete[] mt;
@@ -31,4 +31,3 @@ void Matriz::set(int i, int j, int valor) {
 int Matriz::get(int i, int j) {
     return *(*(mt+i)+j);
 }
-
