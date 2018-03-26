@@ -36,12 +36,12 @@ int main() {
 		unsigned long start, end;
 	 	RDTSC_START(start);
 		acum = 0;
-	 	for(int i=0;i<5;i++){
-			for(int j=0;j<5;j++){
-				for(int k=0;k<5;k++){
-					acum += mat.get(i,k)*mat2.get(k,j); 
+	 	for(unsigned int i=0;i<mat4.size();i++){
+			for(unsigned int j=0;j<mat5[i].size();j++){
+				for(unsigned int k=0;k<mat4.size();k++){
+					acum += mat4[i][k]*mat5[k][j];
 				}
-				mat3.set(i,j,acum);
+				mat6[i][j] = acum;
 				acum = 0;
 			}	
 		}
@@ -50,12 +50,12 @@ int main() {
 	 	fprintf(fp,"%lu\n",delta);
 		RDTSC_START(start);
 		acum = 0;
-		for(int i=0;i<mat4.size();i++){
-			for(int j=0;j<mat5[i].size();j++){
-				for(int k=0;k<mat4.size();k++){
-					acum += mat4[i][k]*mat5[k][j];
-					}
-				mat6[i][j] = acum;
+		for(int i=0;i<mat3.sizeColumna;i++){
+			for(int j=0;j<mat3.sizeFila;j++){
+				for(int k=0;k<mat.sizeFila;k++){
+					acum += mat.get(i,k)*mat2.get(k,j); 
+				}
+				mat3.set(i,j,acum);
 				acum = 0;
 			}	
 		}
@@ -64,8 +64,8 @@ int main() {
 	 	fprintf(fp2,"%lu\n",delta);
 	 		
 	}
-	printf("%u\n",mat4[0][1]);
-	printf("%u\n",mat.get(0,1));
+	printf("%u\n",mat6[4][4]); //En -O3 tarda menos el de vectores, pero en -O0 tarda menos el otro
+	printf("%u\n",mat3.get(4,4));
 	/*mat.~Matriz();
 	mat2.~Matriz();
 	mat3.~Matriz();*/

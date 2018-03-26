@@ -21,7 +21,7 @@ Matriz::~Matriz(){
         delete[] mt[i];
     }
     delete[] mt;
-};
+}
 
 
 void Matriz::set(int i, int j, int valor) {
