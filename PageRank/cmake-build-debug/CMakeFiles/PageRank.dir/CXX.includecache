@@ -1,0 +1,40 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/christian/CLionProjects/PageRank/Matriz.cpp
+iostream
+-
+vector
+-
+stdlib.h
+-
+Matriz.h
+/home/christian/CLionProjects/PageRank/Matriz.h
+
+/home/christian/CLionProjects/PageRank/Matriz.h
+iostream
+-
+vector
+-
+stdlib.h
+-
+
+/home/christian/CLionProjects/PageRank/main.cpp
+iostream
+-
+fstream
+-
+vector
+-
+tuple
+-
+stdlib.h
+-
+Matriz.h
+/home/christian/CLionProjects/PageRank/Matriz.h
+
