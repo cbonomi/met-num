@@ -2,11 +2,13 @@
 #define PAGERANK_MAPMATRIX_H
 
 #include <map>
+#include <vector>
+
 using namespace std;
 
 class MapMatrix {
 public:
-    MapMatrix(); //constructor por defecto
+    MapMatrix(); //Construyo una "matriz" de 0x0
 
     MapMatrix(uint h, uint w); //Nueva matriz "Llena de ceros" de altura h, ancho w.
 
@@ -25,8 +27,6 @@ public:
     float & operator[](const pair<uint, uint> &p); //Usar solo si se quieren hacer muchas asignaciones distintas de 0.
     // Cuidado, no usar para asignar ceros, usar asignar en tal caso.
 
-    void asignar0(const pair<uint, uint> p); //Asigna 0 en la posición key.
-
     MapMatrix sumaMatrices(const MapMatrix &A, const MapMatrix &B);
 
     MapMatrix productoMatrices(const MapMatrix &A, const MapMatrix &B);
@@ -35,6 +35,7 @@ public:
 private:
     map<pair<uint,uint>, float> m; //La matriz va a tener posiciones i, j enteras sin signo, y en esa posicion va a
     // tener un float (la matriz va a realizar ecuaciones con floats).
+    vector<vector<bool> > esCero;
     uint width;
     uint height;
 };

@@ -5,7 +5,7 @@ MapMatrix::MapMatrix() {
     height = 0;
 }
 
-MapMatrix::MapMatrix(uint h, uint w) {
+MapMatrix::MapMatrix(uint h, uint w) : esCero(h, vector<bool>(w, true)) {
     height = h;
     width = w;
 }
@@ -20,9 +20,11 @@ uint MapMatrix::cantColumnas() const {
 
 void MapMatrix::asignar(const pair<uint, uint> p, const float value) {
     if (value==0) {
-        asignar0(p);
+        m.erase(p);
+        esCero[p.first][p.second] = true;
     } else if (p.first < height and p.second<width) {
         m[p] = value;
+        esCero[p.first][p.second] = false;
     }
 }
 
@@ -40,10 +42,6 @@ float& MapMatrix::operator[](const pair<uint, uint> &p) {
     if (p.first < height and p.second < width) {
         return m[p];
     }
-}
-
-void MapMatrix::asignar0(const pair<uint, uint> p) {
-    m.erase(p);
 }
 
 MapMatrix MapMatrix::sumaMatrices(const MapMatrix &A, const MapMatrix &B) {
@@ -65,7 +63,7 @@ MapMatrix MapMatrix::sumaMatrices(const MapMatrix &A, const MapMatrix &B) {
             }
         }
     } else {
-        MapMatrix result; //no se puede operar, devuelvo matriz 0.
+        MapMatrix result; //no se puede operar, devuelvo matriz 0x0.
         return result;
     }
 }
@@ -78,10 +76,13 @@ MapMatrix MapMatrix::productoMatrices(const MapMatrix &A, const MapMatrix &B) {
         while(f < result.height) {
             while (c < result.width) {
                 for(int k=0; k < A.width; k++) {
-                    result.asignar(make_pair(f,c), result.at(make_pair(f,c)) + A.at(make_pair(f,k)) * B.at(make_pair(k,c)));
+                    if (A.esCero[f][k] == false and B.esCero[k][c] == false) {
+                        result.asignar(make_pair(f,c), result.at(make_pair(f,c)) + A.at(make_pair(f,k)) * B.at(make_pair(k,c)));
+                    }
                 }
                 c++;
             }
+            c = 0;
             f++;
         }
     }
