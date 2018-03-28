@@ -17,8 +17,8 @@ float& MapMatrix::operator[](const pair<uint, uint> &p) {
 MapMatrix MapMatrix::sumaMatrices(const MapMatrix &A, const MapMatrix &B) {
     if(A.width == B.width and A.height == B.height) {
         MapMatrix result(A.height, A.width);
-        map::iterator it1 = A.m.begin();
-        map::iterator it2 = B.m.begin();
+        map<pair<uint, uint>, float>::const_iterator it1 = A.m.begin();
+        map<pair<uint, uint>, float>::const_iterator it2 = B.m.begin();
         while(it1 != A.m.end() or it2 != B.m.end()) {
             if (it2 == B.m.end() or it1->first < it2->first){
                 result[it1->first] = it1->second; // B tiene un valor nulo, solo coloco el valor de A.
