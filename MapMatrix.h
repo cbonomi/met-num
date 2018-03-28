@@ -10,15 +10,26 @@ public:
 
     MapMatrix(uint h, uint w); //Nueva matriz "Llena de ceros" de altura h, ancho w.
 
-    MapMatrix(const MapMatrix & orig) = default; //default copy constructor
+    MapMatrix(const MapMatrix &orig) = default; //default copy constructor
 
     ~MapMatrix() = default; //destructor por defecto
 
-    float & operator[](const pair<uint, uint> & p);
+    uint cantFilas() const;
 
-    MapMatrix sumaMatrices(const MapMatrix & A, const MapMatrix & B);
+    uint cantColumnas() const;
 
-    MapMatrix productoMatrices();
+    void asignar(const pair<uint, uint> p, const float value); //Si el valor a asignar puede o no ser 0, usar esta función (y no operator[]).
+
+    const float at(const pair<uint, uint> p) const; //útil si queres leer la posición sin asignar un 0 (operator[] crea el nodo sin importar si no asignas nada).
+
+    float & operator[](const pair<uint, uint> &p); //Usar solo si se quieren hacer muchas asignaciones distintas de 0.
+    // Cuidado, no usar para asignar ceros, usar asignar en tal caso.
+
+    void asignar0(const pair<uint, uint> p); //Asigna 0 en la posición key.
+
+    MapMatrix sumaMatrices(const MapMatrix &A, const MapMatrix &B);
+
+    MapMatrix productoMatrices(const MapMatrix &A, const MapMatrix &B);
 
     MapMatrix triangularMatriz();
 private:
