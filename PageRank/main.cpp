@@ -4,49 +4,42 @@
 #include <tuple>
 #include <stdlib.h>
 #include "Matriz.h"
+#include "Util.cpp"
+
+/**
+ * Aca implementacion del PageRank
+ * @param matrizDeConectividad la matriz con los links entre las paginas
+ * @return devuelve el ranking.
+ */
+std::vector<float> pageRank(Matriz matrizDeConectividad) {
+    std::vector<float> ranking(5);
+
+    cout << "\n" << matrizDeConectividad;
+
+    ranking.push_back(0.4);
+    ranking[1] = 0.1;
+    ranking[2] = 0.2;
+    ranking[3] = 0.15;
+    ranking[4] = 0.15;
+    return ranking;
+}
+
 
 int main(int argc, char * argv[]) {
-    std::fstream entrada("prueba.txt", std::ios_base::in);
 
-    int cantidadTotalDePaginas;
-    int cantidadTotalDeLinks;
+    if (argc != 3) {
+        cout << "Modo de uso: tp1 archivo p\n";
+    } else {
+        string nombreArchivo = argv[1];
 
+        float probabilidadDeSaltar = atof(argv[2]);
 
-    entrada >> cantidadTotalDePaginas >> cantidadTotalDeLinks;
+        Matriz matrizDeConectividad = leerMatriz(nombreArchivo);
 
-    printf("cantidad paginas: %i \n", cantidadTotalDePaginas);
-    printf(" cantidad links: %i \n", cantidadTotalDeLinks);
+       std::vector<float> ranking = pageRank(matrizDeConectividad);
 
-    Matriz mtrz(cantidadTotalDePaginas, cantidadTotalDeLinks);
-
-    int i, j;
-
-    while (entrada >> i >> j) {
-        printf("i: %i\n", i);
-        printf("j: %i\n", j);
-        mtrz.set(i, j, 1);
+        escribirRanking(nombreArchivo + ".out", ranking, probabilidadDeSaltar);
     }
 
-    printf("elemento guardado: %i \n", mtrz.get(12, 1));
-    printf("elemento nulo: %i \n", mtrz.get(12, 2));
-
-
-/*    for(int i=0; i<cantidadTotalDeLinks; i++) {
-        entrada >> links[i][0] >> links[i][1];
-
-    }*/
-    /*
-    while (entrada >> a)
-    {
-        printf("%i ", a);
-    }
-
-*/
     return 0;
 }
-/*
-En la primera lı́nea un entero N , la cantidad total de páginas.
-En la segunda lı́nea un entero M , la cantidad total de links.
-Luego siguen M lı́neas, cada una con dos enteros i j separados
- por un espacio (1 ≤ i, j ≤ N ), indicando que hay un link de la página i a la página j.
-        */
