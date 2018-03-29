@@ -65,12 +65,42 @@ int main() {
 	 		
 	}
 	printf("%u\n",mat6[4][4]); //En -O3 tarda menos el de vectores, pero en -O0 tarda menos el otro
-	printf("%u\n",mat3.get(4,4));
+//	printf("%u\n",mat3.get(4,4));
 	/*mat.~Matriz();
 	mat2.~Matriz();
 	mat3.~Matriz();*/
-	
 
+    printf("10 \t 45 \n");
+
+    Matriz A(2, 2);
+    A.set(0, 0, 10);
+	A.set(0, 1, 13);
+	A.set(1, 0, 4);
+	A.set(1, 1, 6);
+
+	Matriz B(2, 2);
+	B.set(0, 0, 3);
+	B.set(0, 1, 10);
+	B.set(1, 0, 1);
+	B.set(1, 1, 0);
+
+
+	unsigned long start, end;
+	unsigned long startm, endm;
+	RDTSC_START(start);
+	Matriz suma = A + B;
+	RDTSC_STOP(end);
+	unsigned long delta = end - start;
+
+	RDTSC_START(startm);
+	Matriz multiplicacion = A * B;
+	RDTSC_STOP(endm);
+	unsigned long deltam = endm - startm;
+
+	printf("el resultado de la suma (%ul): \n", delta);
+	cout << suma;
+	printf("\n el resultado de la multiplicación (%ul): \n", delta);
+	cout << multiplicacion;
     return 0;
 }
 

@@ -10,16 +10,22 @@ using namespace std;
 class Matriz {
 
 private:
-    int** mt;
+    float** mt;
 
 public:
     int sizeColumna, sizeFila;
-    Matriz(int vn, int vm);
+
+    Matriz(int n, int m);
+
+    Matriz operator+(Matriz &B);
+    Matriz operator*(Matriz &B);
+    //float operator[][](const int &i, const int &j);
 
     void set(int i, int j, int valor);
-    int get(int i, int j);
+    float get(const int i, const int j);
     ~Matriz();
 
 };
+std::ostream& operator << (std::ostream &o, Matriz &B);
 
 #endif
