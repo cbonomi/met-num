@@ -7,6 +7,7 @@
 using namespace std;
 
 class VectorMapMatrix {
+public:
     VectorMapMatrix(); //Construyo una "matriz" de 0x0
 
     VectorMapMatrix(uint h, uint w); //Nueva matriz "Llena de ceros" de altura h, ancho w.
