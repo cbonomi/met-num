@@ -1,4 +1,5 @@
 #include "VectorMapMatrix.h"
+#include <sstream>
 
 VectorMapMatrix::VectorMapMatrix() {
     width = 0;
@@ -37,19 +38,18 @@ float& VectorMapMatrix::operator[](pair<uint, uint> p) {
         return m[p.first][p.second];
     }
 }
-
-VectorMapMatrix VectorMapMatrix::sumaMatrices(const VectorMapMatrix &A, const VectorMapMatrix &B) {
-    if(A.cantFilas() == B.cantFilas() and A.cantColumnas() == B.cantColumnas()) {
-        VectorMapMatrix result(A.cantFilas(), A.cantColumnas());
-        map<uint, float>::const_iterator it1 = A.m[0].begin();
+VectorMapMatrix VectorMapMatrix::operator+(VectorMapMatrix const &B) {
+    if(cantFilas() == B.cantFilas() and cantColumnas() == B.cantColumnas()) {
+        VectorMapMatrix result(cantFilas(), cantColumnas());
+        map<uint, float>::const_iterator it1 = m[0].begin();
         map<uint, float>::const_iterator it2 = B.m[0].begin();
         uint f = 0;
-        while (f < A.cantFilas()) {
-            while(it1 != A.m[f].end() or it2 != B.m[f].end()) {
+        while (f < cantFilas()) {
+            while(it1 != m[f].end() or it2 != B.m[f].end()) {
                 if (it2 == B.m[f].end() or it1->first < it2->first){
                     result.asignar(f, it1->first, it1->second); // B tiene un valor nulo, solo coloco el valor de A.
                     it1++;
-                } else if (it1 == A.m[f].end() or it1->first > it2->first) {
+                } else if (it1 == m[f].end() or it1->first > it2->first) {
                     result.asignar(f, it2->first, it2->second); // A tiene un valor nulo, solo coloco el valor de B.
                     it2++;
                 } else {
@@ -59,7 +59,7 @@ VectorMapMatrix VectorMapMatrix::sumaMatrices(const VectorMapMatrix &A, const Ve
                 }
             }
             f++; //voy a la siguiente fila
-            it1 = A.m[f].begin(); //acomodo los iteradores para la nueva fila.
+            it1 = m[f].begin(); //acomodo los iteradores para la nueva fila.
             it2 = B.m[f].begin();
         }
         return result;
@@ -69,14 +69,14 @@ VectorMapMatrix VectorMapMatrix::sumaMatrices(const VectorMapMatrix &A, const Ve
     }
 }
 
-VectorMapMatrix VectorMapMatrix::productoMatrices(const VectorMapMatrix &A, const VectorMapMatrix &B) {
-    if(A.cantColumnas() == B.cantFilas()) {
-        VectorMapMatrix result(A.cantFilas(), B.cantColumnas());
-        vector<vector<float> > sumasParciales(A.cantColumnas(),vector<float>(B.cantColumnas(), 0));
+VectorMapMatrix VectorMapMatrix::operator*(const VectorMapMatrix &B) {
+    if(cantColumnas() == B.cantFilas()) {
+        VectorMapMatrix result(cantFilas(), B.cantColumnas());
+        vector<vector<float> > sumasParciales(cantColumnas(),vector<float>(B.cantColumnas(), 0));
         uint f = 0; //Recorro sobre A, y cuando estoy en el elemento a(ij) multiplico por la fila j de B, sumándolo en result.
-        while(f < A.cantFilas()) {
-            map<uint, float>::const_iterator it1 = A.m[f].begin();
-            while (it1 != A.m[f].end()) {
+        while(f < cantFilas()) {
+            map<uint, float>::const_iterator it1 = m[f].begin();
+            while (it1 != m[f].end()) {
                 map<uint, float>::const_iterator it2 = B.m[it1->first].begin(); //Si el it1 esta en columna j, creo it2 en fila j.
                 while(it2 != B.m[it1->first].end()) {
                     sumasParciales[f][it2->first] += it1->second * it2->second;//asigno en
@@ -104,4 +104,68 @@ VectorMapMatrix VectorMapMatrix::productoMatrices(const VectorMapMatrix &A, cons
     }
 }
 
+void VectorMapMatrix::operator*(float valor) {
+    float acum = 0;
+    for (int i = 0; i<cantFilas(); i++) {
+        for (int j = 0; j<cantColumnas(); j++) {
+            acum = at(i, j) * valor;
+            asignar(i, j, acum);
+        }
+    }
+}
+
 VectorMapMatrix VectorMapMatrix::triangularMatriz() {}
+
+
+/*
+ * Funciones para mostrar la matriz
+ */
+
+string convertirAString(float num) {
+    stringstream ss (stringstream::in | stringstream::out);
+    ss << num;
+    string cadena = ss.str();
+    return cadena;
+}
+
+int cantidadDeDigitosMaxima(VectorMapMatrix &M) {
+    int maximo = 0;
+    int cantDigitos = 0;
+    for (int i=0; i < M.cantFilas(); i++) {
+        for (int j=0; j< M.cantColumnas(); j++) {
+            cantDigitos = convertirAString(M.at(i,j)).length();
+            if (maximo < cantDigitos)
+                maximo = cantDigitos;
+        }
+    }
+    return maximo;
+}
+
+string agregarEspacios(float valor, int cantidadMaxima) {
+    string ret = convertirAString(valor);
+    cantidadMaxima = cantidadMaxima - ret.length();
+    for (int i=0; i < cantidadMaxima+1; i++) {
+        ret = " " + ret;
+    }
+    return ret;
+}
+
+std::ostream& operator << (std::ostream &o, VectorMapMatrix &B) {
+    string espacio;
+    int cantDigitos = cantidadDeDigitosMaxima(B);
+    for (int i=0; i < cantDigitos; i++) {
+        espacio += " ";
+    }
+
+    for (int i = 0; i < B.cantFilas(); i++) {
+        for (int j = 0; j < B.cantColumnas(); j++) {
+            if (B.at(i, j) < 0)
+                espacio = " \t";
+            else
+                espacio = " \t \t \t";
+            o << agregarEspacios(B.at(i, j), cantDigitos);
+        }
+        o << "\n";
+    }
+    return o;
+}

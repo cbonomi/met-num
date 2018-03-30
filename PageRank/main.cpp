@@ -4,11 +4,11 @@
 #include <tuple>
 #include <stdlib.h>
 #include "Matriz.h"
-#include "Util.cpp"
+#include "Util.h"
 
+using namespace std;
 
-
-Matriz getMatrizProbabilidad(int sizeFila, int sizeColumna, float p) {
+/*Matriz getMatrizProbabilidad(int sizeFila, int sizeColumna, float p) {
     Matriz ret(sizeFila, sizeColumna);
     for (int i=0; i < sizeFila; i++) {
         for (int j=0; j<sizeColumna; j++) {
@@ -17,7 +17,7 @@ Matriz getMatrizProbabilidad(int sizeFila, int sizeColumna, float p) {
         }
     }
     return ret;
-}
+}*/
 
 /*Matriz getVectorLinksSalientes(Matriz W) {
     Matriz ret(W.sizeFila, 1);
@@ -33,37 +33,37 @@ Matriz getMatrizProbabilidad(int sizeFila, int sizeColumna, float p) {
     return ret;
 }*/
 
-Matriz getMatrizPuntajesPonderados(Matriz &W) {
-    Matriz ret(W.sizeFila, W.sizeColumna);
+VectorMapMatrix getMatrizPuntajesPonderados(VectorMapMatrix &W) {
+    VectorMapMatrix ret(W.cantFilas(), W.cantColumnas());
     float acum;
-    for (int j=0; j<W.sizeColumna; j++) {
+    for (int j=0; j<W.cantColumnas(); j++) {
         acum = 0;
-        for (int i=0; i < W.sizeFila; i++) {
-            acum += W.get(i, j);
+        for (int i=0; i < W.cantFilas(); i++) {
+            acum += W.at(i, j);
         }
         if (acum != 0)
-            ret.set(j, j, 1 / acum);
+            ret.asignar(j, j, 1 / acum);
     }
     return ret;
 
 }
 
-Matriz getVectorProbabilidadesDeSalto(Matriz &D, float p) {
-    Matriz ret(1, D.sizeColumna);
-    int n = D.sizeColumna;
-    for (int j=0; j<D.sizeColumna; j++) {
-        if (D.get(j,j) != 0)
-            ret.set(1, j, (1-p)/n);
+VectorMapMatrix getVectorProbabilidadesDeSalto(VectorMapMatrix &D, float p) {
+    VectorMapMatrix ret(1, D.cantColumnas());
+    int n = D.cantColumnas();
+    for (int j=0; j<D.cantColumnas(); j++) {
+        if (D.at(j,j) != 0)
+            ret.asignar(1, j, (1-p)/n);
         else
-            ret.set(1, j, 1/n);
+            ret.asignar(1, j, 1/n);
     }
     return ret;
 }
 
-Matriz getMatrizIdentidad(int tamano) {
-    Matriz ret(tamano, tamano);
+VectorMapMatrix getMatrizIdentidad(int tamano) {
+    VectorMapMatrix ret(tamano, tamano);
     for (int i=0; i<tamano; i++) {
-        ret.set(i, i, 1);
+        ret.asignar(i, i, 1);
     }
     return ret;
 }
@@ -73,9 +73,9 @@ Matriz getMatrizIdentidad(int tamano) {
  * @param matrizDeConectividad la matriz con los links entre las paginas
  * @return devuelve el ranking.
  */
-std::vector<float> pageRank(Matriz &W, float probabilidadDeSaltar) {
+vector<float> pageRank(VectorMapMatrix &W, float probabilidadDeSaltar) {
 
-    std::vector<float> ranking(5);
+    vector<float> ranking(5);
     cout << "Matriz W antes: \n";
     cout << "\n" << W << "\n\n";
     W * probabilidadDeSaltar;
@@ -84,7 +84,7 @@ std::vector<float> pageRank(Matriz &W, float probabilidadDeSaltar) {
 
 
     //p tiene que ser un numero
-    Matriz D = getMatrizPuntajesPonderados(W);
+    VectorMapMatrix D = getMatrizPuntajesPonderados(W);
     cout << "Matriz D: \n";
     cout << D << "\n\n";
 /*    Matriz z = getVectorProbabilidadesDeSalto(D, probabilidadDeSaltar);
@@ -114,9 +114,9 @@ int main(int argc, char * argv[]) {
 
         float probabilidadDeSaltar = atof(argv[2]);
 
-        Matriz matrizDeConectividad = leerMatriz(nombreArchivo);
+        VectorMapMatrix matrizDeConectividad = leerMatriz(nombreArchivo);
 
-       std::vector<float> ranking = pageRank(matrizDeConectividad, probabilidadDeSaltar);
+        vector<float> ranking = pageRank(matrizDeConectividad, probabilidadDeSaltar);
 
         escribirRanking(nombreArchivo + ".out", ranking, probabilidadDeSaltar);
     }

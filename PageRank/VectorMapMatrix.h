@@ -27,9 +27,11 @@ public:
     float & operator[](pair<uint,uint> p); //Usar solo si se quieren hacer muchas asignaciones distintas de 0.
     // Cuidado, no usar para asignar ceros, usar asignar en tal caso.
 
-    VectorMapMatrix sumaMatrices(const VectorMapMatrix &A, const VectorMapMatrix &B);
+    VectorMapMatrix operator+(VectorMapMatrix const &B);
 
-    VectorMapMatrix productoMatrices(const VectorMapMatrix &A, const VectorMapMatrix &B);
+    VectorMapMatrix operator*(VectorMapMatrix const &B);
+
+    void operator*(float valor);
 
     VectorMapMatrix triangularMatriz();
 private:
@@ -37,5 +39,6 @@ private:
     size_t width;
 };
 
+ostream& operator << (ostream &o, VectorMapMatrix &B);
 
 #endif //PAGERANK_VECTORMAPMATRIX_H
