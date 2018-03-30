@@ -87,13 +87,13 @@ vector<float> pageRank(VectorMapMatrix &W, float probabilidadDeSaltar) {
     VectorMapMatrix D = getMatrizPuntajesPonderados(W);
     cout << "Matriz D: \n";
     cout << D << "\n\n";
-/*    Matriz z = getVectorProbabilidadesDeSalto(D, probabilidadDeSaltar);
+    VectorMapMatrix z = getVectorProbabilidadesDeSalto(D, probabilidadDeSaltar);
     cout << "Matriz z: \n";
     cout << z << "\n\n";
-    Matriz I = getMatrizIdentidad(W.sizeFila);
+    VectorMapMatrix I = getMatrizIdentidad(W.cantFilas());
     cout << "Matriz I: \n";
     cout << I << "\n\n";
-*/
+
 
 
     ranking.push_back(0.4);
