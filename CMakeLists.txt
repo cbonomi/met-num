@@ -3,4 +3,4 @@ project(PageRank)
 
 set(CMAKE_CXX_STANDARD 11)
 
-add_executable(PageRank main.cpp Matriz.cpp MapMatrix.cpp MapMatrix.h VectorMapMatrix.cpp VectorMapMatrix.h)
+add_executable(PageRank PageRank/main.cpp PageRank/Matriz.cpp PageRank/MapMatrix.cpp PageRank/MapMatrix.h PageRank/VectorMapMatrix.cpp PageRank/VectorMapMatrix.h)
