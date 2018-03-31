@@ -34,6 +34,10 @@ public:
     void operator*(float valor);
 
     VectorMapMatrix triangularMatriz();
+
+	pair<vector<float>,short> EG(VectorMapMatrix m, vector<float> b);
+	
+	void permutar(VectorMapMatrix m, unsigned int j, unsigned int i);
 private:
     vector<map<uint, float> > m; //La matriz va a tener un vector vertical, de arboles rojo negro horizontales.
     size_t width;

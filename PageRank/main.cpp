@@ -36,9 +36,9 @@ using namespace std;
 VectorMapMatrix getMatrizPuntajesPonderados(VectorMapMatrix &W) {
     VectorMapMatrix ret(W.cantFilas(), W.cantColumnas());
     float acum;
-    for (int j=0; j<W.cantColumnas(); j++) {
+    for (unsigned int j=0; j<W.cantColumnas(); j++) {
         acum = 0;
-        for (int i=0; i < W.cantFilas(); i++) {
+        for (unsigned int i=0; i < W.cantFilas(); i++) {
             acum += W.at(i, j);
         }
         if (acum != 0)
@@ -51,7 +51,7 @@ VectorMapMatrix getMatrizPuntajesPonderados(VectorMapMatrix &W) {
 VectorMapMatrix getVectorProbabilidadesDeSalto(VectorMapMatrix &D, float p) {
     VectorMapMatrix ret(1, D.cantColumnas());
     int n = D.cantColumnas();
-    for (int j=0; j<D.cantColumnas(); j++) {
+    for (unsigned int j=0; j<D.cantColumnas(); j++) {
         if (D.at(j,j) != 0)
             ret.asignar(1, j, (1-p)/n);
         else

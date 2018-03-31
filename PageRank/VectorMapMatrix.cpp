@@ -37,6 +37,7 @@ float& VectorMapMatrix::operator[](pair<uint, uint> p) {
     if (p.first < m.size() and p.second < width) {
         return m[p.first][p.second];
     }
+	return m[0][0];//agregue esto solo para devolver algo en caso de que se invoque mal
 }
 VectorMapMatrix VectorMapMatrix::operator+(VectorMapMatrix const &B) {
     if(cantFilas() == B.cantFilas() and cantColumnas() == B.cantColumnas()) {
@@ -106,8 +107,8 @@ VectorMapMatrix VectorMapMatrix::operator*(const VectorMapMatrix &B) {
 
 void VectorMapMatrix::operator*(float valor) {
     float acum = 0;
-    for (int i = 0; i<cantFilas(); i++) {
-        for (int j = 0; j<cantColumnas(); j++) {
+    for (unsigned int i = 0; i<cantFilas(); i++) {
+        for (unsigned int j = 0; j<cantColumnas(); j++) {
             acum = at(i, j) * valor;
             asignar(i, j, acum);
         }
@@ -116,7 +117,75 @@ void VectorMapMatrix::operator*(float valor) {
 
 VectorMapMatrix VectorMapMatrix::triangularMatriz() {}
 
+void VectorMapMatrix::permutar(VectorMapMatrix m, unsigned int j, unsigned int i){
+	VectorMapMatrix p = VectorMapMatrix(m.cantFilas(),m.width);
+	for (unsigned int k = 0; i<m.cantFilas(); i++){ //genero la matriz de permutacion
+		if (k!=i && k!=j){
+			p.asignar(k, k, 1);
+		} else if (k==i){
+			p.asignar(j, k, 1);
+		} else {
+			p.asignar(i, k, 1);
+		}
+	}
+	m = p*m; //multiplico las matrices, p va a la izquierda porque quiero permutar filas
 
+
+
+}
+
+pair<vector<float>,short> VectorMapMatrix::EG(VectorMapMatrix m, vector<float> b) {
+	unsigned int i,j;
+	vector<float> res;
+	short status = 0; //status default, el sistema tiene una unica solucion posible
+	float A_kk, A_jk;
+	VectorMapMatrix copy = VectorMapMatrix(m);
+	VectorMapMatrix Mk = VectorMapMatrix(m.cantFilas(),m.width);
+	bool cont = false; //el bool da es false si en toda la columna de i en adelante es 0, es decir me tengo que saltear este paso
+	for(i = 0; i < copy.cantFilas(); i++){ //itero sobre las filas
+		for(j = i; i < copy.cantFilas(); i++){ //itero sobre las filas desde i en adelante, estaria por fijarme si tengo que hacer o no calculo en el paso i de la EG
+			if(copy.at(j,i) != 0){ //si no hay un 0 en la posicion j,i
+				cont = true;
+				if(copy.at(i,i) == 0){
+					permutar(copy,j,i); //cambio de lugar las filas porque habia un 0 en la diagonal pero no en el resto de la columna
+				}
+				break;
+			}
+			
+		}
+		A_kk = copy.at(j,i);
+		for(j = i + 1; i < copy.cantFilas(); i++){ //cálculo del paso i si corresponde
+			if (!cont){break;} //si me tengo que saltear este paso no calculo nada
+			if(copy.at(j,i) != 0){A_jk = copy.at(j,i);} //A_jk y A_kk son los valores que determinan a las matrices Mk que uso para llegar desde A a U, sabiendo que PA = LU
+			else{A_jk = 0.0;}
+			Mk.asignar(j,i,(-1.0)*A_jk/A_kk);
+			b[j] = b[j]-A_jk/A_kk*b[i]; //no me olvido de actualizar el vector b
+		}
+		if(cont){
+			copy = Mk*copy;
+			cont = false;
+		}
+		
+	}
+	for(i = copy.cantFilas(); i == 0; i--){
+		j = i-1; //porque i arranca en copy.cantFilas() pero se indexa desde 0 a copy.cantFilas() -1
+		if(copy.at(j,j) == 0 && b[j] != 0){
+			status = -1; //el sistema es incompatible
+			break;
+		}
+		if(copy.at(j,j) == 0 && b[j] == 0){
+			status = 1; //hay infinitos resultados
+			res[j] = 0;
+		}
+		else{
+			res[j] = b[j]/copy.at(j,j); //tengo A_jj*x_j = b_j, paso dividiendo el A_jj
+			if (j!=0){
+				b[j-1] = b[j-1] - res[j]*copy.at(j-1,j); //esto es importante, al b_j-1 le paso restando el A_j-1j*x_j, porque ya conozco el resultado de X_j, de forma que en la siguiente iteracion solo voy a tener algo de esta pinta A_jj*x_j = b_j
+			}
+		}
+	}
+	return pair<vector<float>,short>(res,status);
+}
 /*
  * Funciones para mostrar la matriz
  */
@@ -131,8 +200,8 @@ string convertirAString(float num) {
 int cantidadDeDigitosMaxima(VectorMapMatrix &M) {
     int maximo = 0;
     int cantDigitos = 0;
-    for (int i=0; i < M.cantFilas(); i++) {
-        for (int j=0; j< M.cantColumnas(); j++) {
+    for (unsigned int i=0; i < M.cantFilas(); i++) {
+        for (unsigned int j=0; j< M.cantColumnas(); j++) {
             cantDigitos = convertirAString(M.at(i,j)).length();
             if (maximo < cantDigitos)
                 maximo = cantDigitos;
@@ -157,8 +226,8 @@ std::ostream& operator << (std::ostream &o, VectorMapMatrix &B) {
         espacio += " ";
     }
 
-    for (int i = 0; i < B.cantFilas(); i++) {
-        for (int j = 0; j < B.cantColumnas(); j++) {
+    for (unsigned int i = 0; i < B.cantFilas(); i++) {
+        for (unsigned int j = 0; j < B.cantColumnas(); j++) {
             if (B.at(i, j) < 0)
                 espacio = " \t";
             else
