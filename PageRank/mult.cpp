@@ -18,7 +18,7 @@ int main() {
 	VectorMapMatrix mat1 = VectorMapMatrix(5,5);
 	VectorMapMatrix mat2 = VectorMapMatrix(5,5);
 	VectorMapMatrix mat3 = VectorMapMatrix(5,5);
-
+	std::vector<float> bb(5,1.0);
 	
 	std::vector<vector<int> > mat4(5,vector<int>(5));
 	std::vector<vector<int> > mat5(5,vector<int>(5));
@@ -26,14 +26,21 @@ int main() {
 
 	for(int l=0;l<5;l++){
 		for(int j=0;j<5;j++){
-			mat1.asignar(l,j,25.0 + j);
+			mat1.asignar(l,j,20.0+l+j);
 			mat2.asignar(l,j,20.0);
 			mat4[l][j] = 25+j;
 			mat5[l][j] = 20;
 		}	
 	}
+	
+	pair<vector<float>,short> res = mat1.EG(mat1,bb);
+	
+	for(int l=0;l<5;l++){
+		printf("%f ",res.first[l]);
+	}
+	printf("%d\n",res.second);
 	int acum;
-	for(int h = 0; h < 1; h++){
+	for(int h = 0; h < 100; h++){
 		unsigned long start, end;
 	 	RDTSC_START(start);//esto toma tiempos en mult de vector de vectores
 		acum = 0;
@@ -57,14 +64,6 @@ int main() {
 	 	fprintf(fp2,"%lu\n",delta);
 	 		
 	}
-	for(int l=0;l<5;l++){
-		for(int j=0;j<5;j++){
-			printf("%f ",mat3.at(l,j));
-		}
-		printf("\n");	
-	}
-	/*printf("%u\n",mat6[4][4]);
-	printf("%f\n",mat3.at(4,4));*/
 
 
   /*  printf("10 \t 45 \n");

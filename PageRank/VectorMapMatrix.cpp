@@ -85,7 +85,7 @@ VectorMapMatrix VectorMapMatrix::operator*(const VectorMapMatrix &B) {
                     it2++;
                 }
                 it1++;
-            }
+            }	
             f++;
         }
         f = 0;
@@ -97,6 +97,7 @@ VectorMapMatrix VectorMapMatrix::operator*(const VectorMapMatrix &B) {
                 // le doy el hint que empiece por alli.
                 c++; //cplusplus
             }
+		c=0;
             f++;
         }
         return result;
@@ -117,9 +118,9 @@ void VectorMapMatrix::operator*(float valor) {
 
 VectorMapMatrix VectorMapMatrix::triangularMatriz() {}
 
-void VectorMapMatrix::permutar(VectorMapMatrix m, unsigned int j, unsigned int i){
-	VectorMapMatrix p = VectorMapMatrix(m.cantFilas(),m.width);
-	for (unsigned int k = 0; i<m.cantFilas(); i++){ //genero la matriz de permutacion
+VectorMapMatrix VectorMapMatrix::permutar(unsigned int j, unsigned int i){
+	VectorMapMatrix p = VectorMapMatrix(cantFilas(),width);
+	for (unsigned int k = 0; k<cantFilas(); k++){ //genero la matriz de permutacion
 		if (k!=i && k!=j){
 			p.asignar(k, k, 1);
 		} else if (k==i){
@@ -128,63 +129,72 @@ void VectorMapMatrix::permutar(VectorMapMatrix m, unsigned int j, unsigned int i
 			p.asignar(i, k, 1);
 		}
 	}
-	m = p*m; //multiplico las matrices, p va a la izquierda porque quiero permutar filas
+	return p;
 
 
 
 }
 
-pair<vector<float>,short> VectorMapMatrix::EG(VectorMapMatrix m, vector<float> b) {
+pair<vector<float>,short> VectorMapMatrix::EG(const VectorMapMatrix mat, vector<float> bb) {
 	unsigned int i,j;
-	vector<float> res;
+	vector<float> res(width,0);
 	short status = 0; //status default, el sistema tiene una unica solucion posible
 	float A_kk, A_jk;
-	VectorMapMatrix copy = VectorMapMatrix(m);
-	VectorMapMatrix Mk = VectorMapMatrix(m.cantFilas(),m.width);
+	VectorMapMatrix copy = VectorMapMatrix(mat);
+	VectorMapMatrix Mk = VectorMapMatrix(cantFilas(),width);
 	bool cont = false; //el bool da es false si en toda la columna de i en adelante es 0, es decir me tengo que saltear este paso
+	for(i = 0; i < copy.cantFilas(); i++){
+		Mk.asignar(i,i,1.0);
+	}
 	for(i = 0; i < copy.cantFilas()-1; i++){ //itero sobre las filas, excepto la ultima porque ahi no tengo que hacer nada
-		for(j = i; i < copy.cantFilas(); i++){ //itero sobre las filas desde i en adelante, estaria por fijarme si tengo que hacer o no calculo en el paso i de la EG
+		for(j = i; j < copy.cantFilas(); j++){ //itero sobre las filas desde i en adelante, estaria por fijarme si tengo que hacer o no calculo en el paso i de la EG
 			if(copy.at(j,i) != 0){ //si no hay un 0 en la posicion j,i
 				cont = true;
 				if(copy.at(i,i) == 0){
-					permutar(copy,j,i); //cambio de lugar las filas porque habia un 0 en la diagonal pero no en el resto de la columna
+					VectorMapMatrix p = copy.permutar(j,i);
+					copy = p*copy; //cambio de lugar las filas porque habia un 0 en la diagonal pero no en el resto de la columna
 				}
 				break;
-			}
-			
+			}			
 		}
-		A_kk = copy.at(j,i);
-		for(j = i + 1; i < copy.cantFilas(); i++){ //cálculo del paso i si corresponde
+		A_kk = copy.at(i,i);
+		for(j = i + 1; j < copy.cantFilas(); j++){ //cálculo del paso i si corresponde
 			if (!cont){break;} //si me tengo que saltear este paso no calculo nada
-			if(copy.at(j,i) != 0){A_jk = copy.at(j,i);} //A_jk y A_kk son los valores que determinan a las matrices Mk que uso para llegar desde A a U, sabiendo que PA = LU
-			else{A_jk = 0.0;}
-			Mk.asignar(j,i,(-1.0)*A_jk/A_kk);
-			b[j] = b[j]-A_jk/A_kk*b[i]; //no me olvido de actualizar el vector b
+			if(copy.at(j,i) != 0){
+				A_jk = copy.at(j,i);
+				Mk.asignar(j,i,(-1.0)*A_jk/A_kk);
+				bb[j] = bb[j]-A_jk/A_kk*bb[i]; //no me olvido de actualizar el vector b
+			} //A_jk y A_kk son los valores que determinan a las matrices Mk que uso para llegar desde A a U, sabiendo que PA = LU
 		}
 		if(cont){
 			copy = Mk*copy;
+			for(j = i + 1; j < copy.cantFilas(); j++){ //revierto la matriz Mk a I
+				Mk.asignar(j,i,0.0);
+			}
 			cont = false;
 		}
 		
 	}
-	for(i = copy.cantFilas(); i == 0; i--){
-		j = i-1; //porque i arranca en copy.cantFilas() pero se indexa desde 0 a copy.cantFilas() -1
-		if(copy.at(j,j) == 0 && b[j] != 0){
+	
+	for(i = 0; i < copy.cantFilas(); i++){
+		j = copy.cantFilas()-1-i; 
+		if(copy.at(j,j) == 0 && bb[j] != 0){
 			status = -1; //el sistema es incompatible
 			break;
 		}
-		if(copy.at(j,j) == 0 && b[j] == 0){
+		if(copy.at(j,j) == 0 && bb[j] == 0){
 			status = 1; //hay infinitos resultados
 			res[j] = 0;
 		}
 		else{
-			res[j] = b[j]/copy.at(j,j); //tengo A_jj*x_j = b_j, paso dividiendo el A_jj
+			res[j] = bb[j]/copy.at(j,j); //tengo A_jj*x_j = b_j, paso dividiendo el A_jj
+			
 			if (j!=0){
-				b[j-1] = b[j-1] - res[j]*copy.at(j-1,j); //esto es importante, al b_j-1 le paso restando el A_j-1j*x_j, porque ya conozco el resultado de X_j, de forma que en la siguiente iteracion solo voy a tener algo de esta pinta A_jj*x_j = b_j
+				bb[j-1] = bb[j-1] - res[j]*copy.at(j-1,j); //esto es importante, al b_j-1 le paso restando el A_j-1j*x_j, porque ya conozco el resultado de X_j, de forma que en la siguiente iteracion solo voy a tener algo de esta pinta A_jj*x_j = b_j
 			}
 		}
 	}
-	return pair<vector<float>,short>(res,status);
+	return make_pair(res,status);
 }
 /*
  * Funciones para mostrar la matriz
