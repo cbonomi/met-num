@@ -142,7 +142,7 @@ pair<vector<float>,short> VectorMapMatrix::EG(VectorMapMatrix m, vector<float> b
 	VectorMapMatrix copy = VectorMapMatrix(m);
 	VectorMapMatrix Mk = VectorMapMatrix(m.cantFilas(),m.width);
 	bool cont = false; //el bool da es false si en toda la columna de i en adelante es 0, es decir me tengo que saltear este paso
-	for(i = 0; i < copy.cantFilas(); i++){ //itero sobre las filas
+	for(i = 0; i < copy.cantFilas()-1; i++){ //itero sobre las filas, excepto la ultima porque ahi no tengo que hacer nada
 		for(j = i; i < copy.cantFilas(); i++){ //itero sobre las filas desde i en adelante, estaria por fijarme si tengo que hacer o no calculo en el paso i de la EG
 			if(copy.at(j,i) != 0){ //si no hay un 0 en la posicion j,i
 				cont = true;

@@ -3,7 +3,7 @@
 #include <vector>
 #include <tuple>
 #include <stdlib.h>
-#include "Matriz.h"
+#include "VectorMapMatrix.h"
 #include "rdtsc.h"
 
 int main() {
@@ -15,26 +15,27 @@ int main() {
 	fp2 = fopen ("mediciones2.txt", "w+");
 
      
-	Matriz mat = Matriz(5,5);
-	Matriz mat2 = Matriz(5,5);
-	Matriz mat3 = Matriz(5,5);
+	VectorMapMatrix mat1 = VectorMapMatrix(5,5);
+	VectorMapMatrix mat2 = VectorMapMatrix(5,5);
+	VectorMapMatrix mat3 = VectorMapMatrix(5,5);
 
+	
 	std::vector<vector<int> > mat4(5,vector<int>(5));
 	std::vector<vector<int> > mat5(5,vector<int>(5));
 	std::vector<vector<int> > mat6(5,vector<int>(5));
 
 	for(int l=0;l<5;l++){
 		for(int j=0;j<5;j++){
-			mat.set(l,j,25+j);
-			mat2.set(l,j,20);
+			mat1.asignar(l,j,25.0 + j);
+			mat2.asignar(l,j,20.0);
 			mat4[l][j] = 25+j;
 			mat5[l][j] = 20;
 		}	
 	}
 	int acum;
-	for(int h = 0; h < 100; h++){
+	for(int h = 0; h < 1; h++){
 		unsigned long start, end;
-	 	RDTSC_START(start);
+	 	RDTSC_START(start);//esto toma tiempos en mult de vector de vectores
 		acum = 0;
 	 	for(unsigned int i=0;i<mat4.size();i++){
 			for(unsigned int j=0;j<mat5[i].size();j++){
@@ -48,29 +49,25 @@ int main() {
 		RDTSC_STOP(end);
 	 	unsigned long delta = end - start;
 	 	fprintf(fp,"%lu\n",delta);
-		RDTSC_START(start);
+		RDTSC_START(start);//esto toma tiempos en mult de nuestra implementacion de matriz
 		acum = 0;
-		for(int i=0;i<mat3.sizeColumna;i++){
-			for(int j=0;j<mat3.sizeFila;j++){
-				for(int k=0;k<mat.sizeFila;k++){
-					acum += mat.get(i,k)*mat2.get(k,j); 
-				}
-				mat3.set(i,j,acum);
-				acum = 0;
-			}	
-		}
+		mat3 = mat1*mat2;
 	 	RDTSC_STOP(end);
 	 	delta = end - start;
 	 	fprintf(fp2,"%lu\n",delta);
 	 		
 	}
-	printf("%u\n",mat6[4][4]); //En -O3 tarda menos el de vectores, pero en -O0 tarda menos el otro
-//	printf("%u\n",mat3.get(4,4));
-	/*mat.~Matriz();
-	mat2.~Matriz();
-	mat3.~Matriz();*/
+	for(int l=0;l<5;l++){
+		for(int j=0;j<5;j++){
+			printf("%f ",mat3.at(l,j));
+		}
+		printf("\n");	
+	}
+	/*printf("%u\n",mat6[4][4]);
+	printf("%f\n",mat3.at(4,4));*/
 
-    printf("10 \t 45 \n");
+
+  /*  printf("10 \t 45 \n");
 
     Matriz A(2, 2);
     A.set(0, 0, 10);
@@ -100,7 +97,7 @@ int main() {
 	printf("el resultado de la suma (%ul): \n", delta);
 	cout << suma;
 	printf("\n el resultado de la multiplicación (%ul): \n", delta);
-	cout << multiplicacion;
+	cout << multiplicacion;*/
     return 0;
 }
 

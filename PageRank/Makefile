@@ -3,14 +3,16 @@ CFLAGS= -std=c++11 -Wall -Wextra -pedantic -g -lm -Wno-unused-variable -Wno-unus
 
 
 
-all: main
+all: main mult
 
 main: main.cpp VectorMapMatrix.cpp Util.cpp
 	$(CC) $(CFLAGS) $^ -o $@
 	
-
+mult: mult.cpp VectorMapMatrix.cpp Util.cpp
+	$(CC) $(CFLAGS) $^ -o $@
 
 clean:
 	rm main
+	rm mult
 	rm *.txt
 
