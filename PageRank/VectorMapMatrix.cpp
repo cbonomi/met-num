@@ -175,7 +175,6 @@ pair<vector<float>,short> VectorMapMatrix::EG(const VectorMapMatrix mat, vector<
 		}
 		
 	}
-	
 	for(i = 0; i < copy.cantFilas(); i++){
 		j = copy.cantFilas()-1-i; 
 		if(copy.at(j,j) == 0 && bb[j] != 0){
@@ -190,7 +189,9 @@ pair<vector<float>,short> VectorMapMatrix::EG(const VectorMapMatrix mat, vector<
 			res[j] = bb[j]/copy.at(j,j); //tengo A_jj*x_j = b_j, paso dividiendo el A_jj
 			
 			if (j!=0){
-				bb[j-1] = bb[j-1] - res[j]*copy.at(j-1,j); //esto es importante, al b_j-1 le paso restando el A_j-1j*x_j, porque ya conozco el resultado de X_j, de forma que en la siguiente iteracion solo voy a tener algo de esta pinta A_jj*x_j = b_j
+				for(unsigned int l = 0; l < j; l++){
+					bb[l] = bb[l] - res[j]*copy.at(l,j); //esto es importante, al b_l con l de 0 a j-1 le paso restando el A_lj*x_j, porque ya conozco el resultado de X_j, de forma que en la siguiente iteracion solo voy a tener algo de esta pinta A_jj*x_j = b_j
+				}
 			}
 		}
 	}
