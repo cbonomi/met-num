@@ -14,6 +14,8 @@ public:
 
     VectorMapMatrix(const VectorMapMatrix &orig) = default; //default copy constructor
 
+    VectorMapMatrix& operator=(const VectorMapMatrix &orig) = default; //default operador de asignacion
+
     ~VectorMapMatrix() = default; //destructor por defecto
 
     size_t cantFilas() const;
