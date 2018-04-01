@@ -93,7 +93,9 @@ VectorMapMatrix VectorMapMatrix::operator*(const VectorMapMatrix &B) {
         while(f < sumasParciales.size()){
             map<uint, float>::iterator hint_iterator = result.m[f].end();
             while(c < sumasParciales[f].size()){
-                result.m[f].insert(hint_iterator,make_pair(c, sumasParciales[f][c])); //como el elemento a insertar debe ir al final,
+                if(sumasParciales[f][c] != 0) {
+                    result.m[f].insert(hint_iterator,make_pair(c, sumasParciales[f][c])); //como el elemento a insertar debe ir al final,
+                }
                 // le doy el hint que empiece por alli.
                 c++; //cplusplus
             }
@@ -108,10 +110,15 @@ VectorMapMatrix VectorMapMatrix::operator*(const VectorMapMatrix &B) {
 
 void VectorMapMatrix::operator*(float valor) {
     float acum = 0;
-    for (unsigned int i = 0; i<cantFilas(); i++) {
-        for (unsigned int j = 0; j<cantColumnas(); j++) {
-            acum = at(i, j) * valor;
-            asignar(i, j, acum);
+    for (unsigned int f = 0; f<cantFilas(); f++) {
+        map<uint, float>::iterator row_iterator = m[f].begin();
+        while (row_iterator != m[f].end()) {
+            if (valor != 0) {
+                row_iterator->second *= valor;
+            } else {
+                m[f].erase(row_iterator);
+            }
+            row_iterator++;
         }
     }
 }
