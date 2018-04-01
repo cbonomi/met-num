@@ -26,7 +26,7 @@ int main() {
 
 	for(int l=0;l<5;l++){
 		for(int j=0;j<5;j++){
-			mat1.asignar(l,j,20.0+l+j);
+			mat1.asignar(l,j,20.0+j);
 			mat2.asignar(l,j,20.0);
 			mat4[l][j] = 25+j;
 			mat5[l][j] = 20;
