@@ -36,6 +36,7 @@ using namespace std;
 VectorMapMatrix getMatrizPuntajesPonderados(VectorMapMatrix &W) {
     VectorMapMatrix ret(W.cantFilas(), W.cantColumnas());
     float acum;
+    cout << W;
     for (unsigned int j=0; j<W.cantColumnas(); j++) {
         acum = 0;
         for (unsigned int i=0; i < W.cantFilas(); i++) {
@@ -50,12 +51,12 @@ VectorMapMatrix getMatrizPuntajesPonderados(VectorMapMatrix &W) {
 
 VectorMapMatrix getVectorProbabilidadesDeSalto(VectorMapMatrix &D, float p) {
     VectorMapMatrix ret(1, D.cantColumnas());
-    int n = D.cantColumnas();
+    float n = D.cantColumnas();
     for (unsigned int j=0; j<D.cantColumnas(); j++) {
         if (D.at(j,j) != 0)
-            ret.asignar(1, j, (1-p)/n);
+            ret.asignar(0, j, (float)((1-p)/n));
         else
-            ret.asignar(1, j, 1/n);
+            ret.asignar(0, j, (float)(1/n));
     }
     return ret;
 }
@@ -76,16 +77,17 @@ VectorMapMatrix getMatrizIdentidad(int tamano) {
 vector<float> pageRank(VectorMapMatrix &W, float probabilidadDeSaltar) {
 
     vector<float> ranking(5);
-    cout << "Matriz W antes: \n";
-    cout << "\n" << W << "\n\n";
-    W * probabilidadDeSaltar;
-    cout << "Matriz W despues: \n";
-    cout << "\n" << W << "\n\n";
+//    cout << "Matriz W antes: \n";
+//    cout << "\n" << W << "\n\n";
+//    cout << "Matriz W despues: \n";
+//    cout << "\n" << W << "\n\n";
 
 
     //p tiene que ser un numero
     VectorMapMatrix D = getMatrizPuntajesPonderados(W);
     cout << "Matriz D: \n";
+    D * probabilidadDeSaltar;
+
     cout << D << "\n\n";
     VectorMapMatrix z = getVectorProbabilidadesDeSalto(D, probabilidadDeSaltar);
     cout << "Matriz z: \n";
@@ -93,7 +95,10 @@ vector<float> pageRank(VectorMapMatrix &W, float probabilidadDeSaltar) {
     VectorMapMatrix I = getMatrizIdentidad(W.cantFilas());
     cout << "Matriz I: \n";
     cout << I << "\n\n";
-
+    D*(-1);
+    VectorMapMatrix I_pWD = I + D;
+    cout << I_pWD << "\n\n";
+    
 
 
     ranking.push_back(0.4);
