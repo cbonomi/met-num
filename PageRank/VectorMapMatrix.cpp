@@ -111,6 +111,31 @@ VectorMapMatrix VectorMapMatrix::operator*(const VectorMapMatrix &B) {
     }
 }
 
+VectorMapMatrix VectorMapMatrix::mult(VectorMapMatrix const &B){
+    if(cantColumnas() == B.cantFilas()) {
+        VectorMapMatrix result(cantFilas(), B.cantColumnas());
+        for(uint i = 0; i < cantFilas(); ++i) { //Recorro las filas de A.
+            for (auto it1 = m[i].cbegin(); it1 != m[i].cend(); ++it1) { //Recorro la i-ésima fila de A.
+                for(auto it2 = B.m[it1->first].begin(); it2 != B.m[it1->first].end(); ++it2) {  //Si el it1 esta en columna j, recorro la fila j de B.
+                    float sumando = it1->second * it2->second;  //"sumando" es a_ik*b_kj donde i = "i", k = "it1->first" y j = "it2->first".
+                    auto it_res = result.m[i].find(it2->first); //Me fijo que hay en res_ij (= a_i1*b_1j + ... + a_i(k-1)*b_(k-1)j )
+                    if(it_res == result.m[i].end()) //Si no estaba definido (era 0)...
+                        result.m[i][it2->first] = sumando;  //lo defino como a_ik*b_kj.
+                    else{   //Si sí estaba definido (no era 0)...
+                        if(it_res->second - sumando == 0)   //pero al sumarle a_ik*b_kj va a dar 0...
+                            result.m[i].erase(it_res);      //lo borro (vale 0);
+                        else                                //y si no va a dar 0...
+                            it_res->second += sumando;      //le sumo a_ik*b_kj.
+                    }
+                }
+            }
+        }
+        return result;
+    } else {
+        return VectorMapMatrix(); //No está definida la multiplicación.
+    }
+}
+
 void VectorMapMatrix::operator*(float valor) {
     float acum = 0;
     for (unsigned int f = 0; f<cantFilas(); f++) {
@@ -214,11 +239,7 @@ pair<vector<float>,short> VectorMapMatrix::EGPP(vector<float> bb) {
     unsigned int i,j;
     vector<float> res(width);
     short status = 0; //status default, el sistema tiene una unica solucion posible
-    //float A_kk, A_jk;
     VectorMapMatrix copy = VectorMapMatrix(*this);
-    VectorMapMatrix Mk = VectorMapMatrix(cantFilas(),width);
-    //float maximo;
-    //unsigned int fila_del_maximo;
     for(i = 0; i < copy.cantFilas()-1; i++){ //itero sobre las filas, excepto la ultima porque ahi no tengo que hacer nada
         float maximo_abs = copy.at(i,i);    //en cada iteración es igual al número más grande (en valor absoluto) del resto de la columna.
         unsigned int fila_del_maximo = i;
@@ -227,10 +248,9 @@ pair<vector<float>,short> VectorMapMatrix::EGPP(vector<float> bb) {
         for(j = i+1; j < copy.cantFilas(); ++j){ //itero sobre las filas desde i+1 en adelante, para encontrar el valor de "maximo_abs".
             // De paso me guardo las filas en las que encuentro un valor != 0 en la columna "i" y me guardo dicho valor.
             map<unsigned int, float>::const_iterator iter = copy[j].find(i);
-            float a_ji = 0;
             if (iter != copy[j].cend()){    //Si el valor está definido, ie, es != 0:
-                a_ji = iter->second;        //guardo su valor y...
-                filas_a_ser_restadas.emplace_back(j, a_ji);  //guardo la fila en la que está.
+                const float& a_ji = iter->second;        //lo llamo a_ji y...
+                filas_a_ser_restadas.emplace_back(j, a_ji);  //guardo la fila en la que está y su valor.
                 if(fabs(a_ji) > fabs(maximo_abs)){ //busco el máximo en valor absoluto
                     maximo_abs = a_ji;
                     fila_del_maximo = j;
@@ -244,11 +264,10 @@ pair<vector<float>,short> VectorMapMatrix::EGPP(vector<float> bb) {
             filas_a_ser_restadas.erase(iter_de_la_lista_apuntando_al_maximo);//También debo sacar de la lista de filas a restar, aquella que contiene al máximo y...
             if (filas_a_ser_restadas.begin()->first == i)    //si la fila "i" está en la lista...
                 filas_a_ser_restadas.begin()->first = fila_del_maximo;    //debe actualizarse el índice de su fila (pues la swapé).
-            float a_ii = filas_a_ser_restadas.begin()->first;
-            for (auto iter_lista = ++filas_a_ser_restadas.begin();
-                 iter_lista != filas_a_ser_restadas.end(); ++iter_lista) {
-                float a_ji = iter_lista->second;
-                resta_de_filas(iter_lista->first, a_ji / a_ii, i);
+            float& a_ii = maximo_abs;
+            for (auto iter_lista = ++filas_a_ser_restadas.begin(); iter_lista != filas_a_ser_restadas.end(); ++iter_lista) {
+                float& a_ji = iter_lista->second;
+                copy.resta_de_filas(iter_lista->first, a_ji / a_ii, i);
             }
         }
     }

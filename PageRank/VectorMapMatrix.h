@@ -35,6 +35,8 @@ public:
 
     VectorMapMatrix operator*(VectorMapMatrix const &B);
 
+    VectorMapMatrix mult(VectorMapMatrix const &B);
+
     void operator*(float valor);
 
     VectorMapMatrix triangularMatriz();
