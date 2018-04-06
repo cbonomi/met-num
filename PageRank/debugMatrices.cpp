@@ -3,6 +3,7 @@
 #include <vector>
 #include <tuple>
 #include <stdlib.h>
+#include <chrono>
 #include "VectorMapMatrix.h"
 #include "rdtsc.h"
 
@@ -58,5 +59,23 @@ int main(){
     }
     C= A*R;
     C= I*R;
+
+    VectorMapMatrix M1(1000,1500);
+    VectorMapMatrix M2(1500,1200);
+    M1.asignar(120, 30, 3.4);
+    M2.asignar(30, 500, 2.0);
+    M1.asignar(420, 600, 4.5);
+    M2.asignar(600, 500, 2.0);
+    M1.asignar(420, 700, 9.0);
+    M2.asignar(700, 500, -1.0);
+    auto t1 = std::chrono::system_clock::now();
+    VectorMapMatrix Res1 = M1*M2;
+    auto t2 = std::chrono::system_clock::now();
+    auto t3 = std::chrono::system_clock::now();
+    VectorMapMatrix Res2 = M1.mult(M2);
+    auto t4 = std::chrono::system_clock::now();
+    std::cout << "El tiempo del oper* dividido el tiempo de la funcion mult es: " << (t2-t1)/(t4-t3) << std::endl;
+    std::cout << "Res_(120,500) debe ser 6.8 y dio respectivamente: " << Res1.at(120, 500) << " , " << Res2.at(120, 500) << std::endl;
+    std::cout << "Res_(420,500) debe ser 0.0 y dio respectivamente: " << Res1.at(420, 500) << " , " << Res2.at(420, 500) << std::endl;
     return 0;
 }
