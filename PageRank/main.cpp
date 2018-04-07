@@ -9,7 +9,7 @@
 
 using namespace std;
 
-/*Matriz getMatrizProbabilidad(int sizeFila, int sizeColumna, float p) {
+/*Matriz getMatrizProbabilidad(int sizeFila, int sizeColumna, double p) {
     Matriz ret(sizeFila, sizeColumna);
     for (int i=0; i < sizeFila; i++) {
         for (int j=0; j<sizeColumna; j++) {
@@ -22,7 +22,7 @@ using namespace std;
 
 /*Matriz getVectorLinksSalientes(Matriz W) {
     Matriz ret(W.sizeFila, 1);
-    float acum;
+    double acum;
     for (int j=0; j<W.sizeColumna; j++) {
         acum = 0;
         for (int i=0; i < W.sizeFila; i++) {
@@ -36,7 +36,7 @@ using namespace std;
 
 VectorMapMatrix getMatrizPuntajesPonderados(VectorMapMatrix &W) {
     VectorMapMatrix ret(W.cantFilas(), W.cantColumnas());
-    float acum;
+    double acum;
     for (unsigned int j=0; j<W.cantColumnas(); j++) {
         acum = 0;
         for (unsigned int i=0; i < W.cantFilas(); i++) {
@@ -49,14 +49,14 @@ VectorMapMatrix getMatrizPuntajesPonderados(VectorMapMatrix &W) {
 
 }
 
-VectorMapMatrix getVectorProbabilidadesDeSalto(VectorMapMatrix &D, float p) {
+VectorMapMatrix getVectorProbabilidadesDeSalto(VectorMapMatrix &D, double p) {
     VectorMapMatrix ret(1, D.cantColumnas());
-    float n = D.cantColumnas();
+    double n = D.cantColumnas();
     for (unsigned int j=0; j<D.cantColumnas(); j++) {
         if (D.at(j,j) != 0)
-            ret.asignar(0, j, (float)((1-p)/n));
+            ret.asignar(0, j, (double)((1-p)/n));
         else
-            ret.asignar(0, j, (float)(1/n));
+            ret.asignar(0, j, (double)(1/n));
     }
     return ret;
 }
@@ -70,8 +70,8 @@ VectorMapMatrix getMatrizIdentidad(int tamano) {
 }
 
 
-vector<float> getb(int tamano) {
-    vector<float> ret(tamano);
+vector<double> getb(int tamano) {
+    vector<double> ret(tamano);
     for (int i=0; i<tamano; i++) {
         ret.assign(i, 1);
     }
@@ -79,7 +79,7 @@ vector<float> getb(int tamano) {
 }
 
 
-void mostrar(vector<float> v) {
+void mostrar(vector<double> v) {
     for (int i=0; i<v.size(); i++)
         cout << v.at(i) << "\n";
 }
@@ -89,9 +89,9 @@ void mostrar(vector<float> v) {
  * @param matrizDeConectividad la matriz con los links entre las paginas
  * @return devuelve el ranking.
  */
-vector<float> pageRank(VectorMapMatrix &W, float probabilidadDeSaltar) {
+vector<double> pageRank(VectorMapMatrix &W, double probabilidadDeSaltar) {
 
-    //   vector<float> ranking(5);
+    //   vector<double> ranking(5);
     cout << "Matriz W antes: \n";
     cout << "\n" << W << "\n\n";
 //    cout << "Matriz W despues: \n";
@@ -130,13 +130,13 @@ vector<float> pageRank(VectorMapMatrix &W, float probabilidadDeSaltar) {
 
 
 
-    vector<float> b = getb(I_pWD.cantFilas());
+    vector<double> b = getb(I_pWD.cantFilas());
 
 //    cout << "termino independiente: \n";
 //    mostrar(terminoIndependiente);
 
 
-/*    float matriz[ORDEN][4]={
+/*    double matriz[ORDEN][4]={
             {0.0375, 0.465, 0.465, 0.0375},
             {0.0375, 0.8875, 0.0375, 0.0375},
             {0.0375, 0.465, 0.0375, 0.465},
@@ -162,10 +162,10 @@ vector<float> pageRank(VectorMapMatrix &W, float probabilidadDeSaltar) {
     W.asignar(3, 2, 0.0375);
     W.asignar(3, 3, 0.8875);
 
-    pair<vector<float>,short> ranking = D.EG(D, b);
+    pair<vector<double>,short> ranking = D.EG(D, b);
 
 //    cout << "ranking: \n";
-    vector<float> rk = ranking.first;
+    vector<double> rk = ranking.first;
 
 //    cout << "status: " << ranking.second;
 
@@ -189,14 +189,14 @@ int main(int argc, char * argv[]) {
     } else {
         string nombreArchivo = argv[1];
 
-        float probabilidadDeSaltar = atof(argv[2]);
+        double probabilidadDeSaltar = atof(argv[2]);
 
         VectorMapMatrix matrizDeConectividad = leerMatriz(nombreArchivo);
 
         unsigned long start, end;
         unsigned long startm, endm;
         RDTSC_START(start);
-        vector<float> ranking = pageRank(matrizDeConectividad, probabilidadDeSaltar);
+        vector<double> ranking = pageRank(matrizDeConectividad, probabilidadDeSaltar);
         RDTSC_STOP(end);
         unsigned long delta = end - start;
         cout << delta;

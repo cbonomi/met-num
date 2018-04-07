@@ -4,6 +4,6 @@
 #include "VectorMapMatrix.h"
 
 VectorMapMatrix leerMatriz(string nombreArchivo);
-void escribirRanking(string nombreArchivo, vector<float> ranking, float probabilidadDeSaltar);
+void escribirRanking(string nombreArchivo, vector<double> ranking, double probabilidadDeSaltar);
 
 #endif

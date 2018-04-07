@@ -25,12 +25,12 @@ VectorMapMatrix leerMatriz(string nombreArchivo) {
     return ret;
 }
 
-void escribirRanking(string nombreArchivo, vector<float> ranking, float probabilidadDeSaltar) {
+void escribirRanking(string nombreArchivo, vector<double> ranking, double probabilidadDeSaltar) {
     ofstream salida(nombreArchivo, ios_base::out);
 
     salida << probabilidadDeSaltar << '\n';
 
-    for (vector<float>::iterator it = ranking.begin() ; it != ranking.end(); ++it)
+    for (vector<double>::iterator it = ranking.begin() ; it != ranking.end(); ++it)
         salida << *it << '\n';
 
     salida.close();

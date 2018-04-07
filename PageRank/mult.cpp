@@ -18,7 +18,7 @@ int main() {
 	VectorMapMatrix mat1 = VectorMapMatrix(5,5);
 	VectorMapMatrix mat2 = VectorMapMatrix(5,5);
 	VectorMapMatrix mat3 = VectorMapMatrix(5,5);
-	std::vector<float> bb(5,1.0);
+	std::vector<double> bb(5,1.0);
 	
 	std::vector<vector<int> > mat4(5,vector<int>(5));
 	std::vector<vector<int> > mat5(5,vector<int>(5));
@@ -33,7 +33,7 @@ int main() {
 		}	
 	}
 	
-	pair<vector<float>,short> res = mat1.EG(mat1,bb);
+	pair<vector<double>,short> res = mat1.EG(mat1,bb);
 	
 	for(int l=0;l<5;l++){
 		printf("%f ",res.first[l]);
