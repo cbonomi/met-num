@@ -70,7 +70,7 @@ VectorMapMatrix getMatrizIdentidad(int tamano) {
 }
 
 
-vector<float> getTerminoIndependiente(int tamano) {
+vector<float> getb(int tamano) {
     vector<float> ret(tamano);
     for (int i=0; i<tamano; i++) {
         ret.assign(i, 1);
@@ -121,14 +121,16 @@ vector<float> pageRank(VectorMapMatrix &W, float probabilidadDeSaltar) {
     cout << "Matriz I: \n";
     cout << I << "\n\n";
     DW * (-1);
+    cout << "Matriz -DW: \n";
+    cout << DW << "\n\n";
 
     VectorMapMatrix I_pWD = I + DW;
-//    cout << "Matriz I_pWD: \n";
-//    cout << I_pWD << "\n\n";
+    cout << "Matriz I_pWD: \n";
+    cout << I_pWD << "\n\n";
 
 
 
-    vector<float> terminoIndependiente = getTerminoIndependiente(I_pWD.cantFilas());
+    vector<float> b = getb(I_pWD.cantFilas());
 
 //    cout << "termino independiente: \n";
 //    mostrar(terminoIndependiente);
@@ -160,14 +162,14 @@ vector<float> pageRank(VectorMapMatrix &W, float probabilidadDeSaltar) {
     W.asignar(3, 2, 0.0375);
     W.asignar(3, 3, 0.8875);
 
-    pair<vector<float>,short> ranking = D.EG(D, terminoIndependiente);
+    pair<vector<float>,short> ranking = D.EG(D, b);
 
 //    cout << "ranking: \n";
     vector<float> rk = ranking.first;
 
 //    cout << "status: " << ranking.second;
 
-//    mostrar(rk);
+    mostrar(rk);
 
 
 
