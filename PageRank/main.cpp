@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include "Matriz.h"
 #include "Util.h"
+#include "rdtsc.h"
 
 using namespace std;
 
@@ -36,7 +37,6 @@ using namespace std;
 VectorMapMatrix getMatrizPuntajesPonderados(VectorMapMatrix &W) {
     VectorMapMatrix ret(W.cantFilas(), W.cantColumnas());
     float acum;
-    cout << W;
     for (unsigned int j=0; j<W.cantColumnas(); j++) {
         acum = 0;
         for (unsigned int i=0; i < W.cantFilas(); i++) {
@@ -69,6 +69,21 @@ VectorMapMatrix getMatrizIdentidad(int tamano) {
     return ret;
 }
 
+
+vector<float> getTerminoIndependiente(int tamano) {
+    vector<float> ret(tamano);
+    for (int i=0; i<tamano; i++) {
+        ret.assign(i, 1);
+    }
+    return ret;
+}
+
+
+void mostrar(vector<float> v) {
+    for (int i=0; i<v.size(); i++)
+        cout << v.at(i) << "\n";
+}
+
 /**
  * Aca implementacion del PageRank
  * @param matrizDeConectividad la matriz con los links entre las paginas
@@ -76,37 +91,92 @@ VectorMapMatrix getMatrizIdentidad(int tamano) {
  */
 vector<float> pageRank(VectorMapMatrix &W, float probabilidadDeSaltar) {
 
-    vector<float> ranking(5);
-//    cout << "Matriz W antes: \n";
-//    cout << "\n" << W << "\n\n";
+    //   vector<float> ranking(5);
+    cout << "Matriz W antes: \n";
+    cout << "\n" << W << "\n\n";
 //    cout << "Matriz W despues: \n";
 //    cout << "\n" << W << "\n\n";
 
 
-    //p tiene que ser un numero
+    //
     VectorMapMatrix D = getMatrizPuntajesPonderados(W);
     cout << "Matriz D: \n";
-    D * probabilidadDeSaltar;
-
     cout << D << "\n\n";
+
+    VectorMapMatrix DW = D*W;
+    cout << "Matriz DW: \n";
+    cout << DW << "\n\n";
+
+    DW * probabilidadDeSaltar;
+
+    cout << "Matriz pDW: \n";
+    cout << DW << "\n\n";
+
+
+
     VectorMapMatrix z = getVectorProbabilidadesDeSalto(D, probabilidadDeSaltar);
-    cout << "Matriz z: \n";
-    cout << z << "\n\n";
+//    cout << "Matriz z: \n";
+//    cout << z << "\n\n";
     VectorMapMatrix I = getMatrizIdentidad(W.cantFilas());
     cout << "Matriz I: \n";
     cout << I << "\n\n";
-    D*(-1);
-    VectorMapMatrix I_pWD = I + D;
-    cout << I_pWD << "\n\n";
-    
+    DW * (-1);
+
+    VectorMapMatrix I_pWD = I + DW;
+//    cout << "Matriz I_pWD: \n";
+//    cout << I_pWD << "\n\n";
 
 
-    ranking.push_back(0.4);
+
+    vector<float> terminoIndependiente = getTerminoIndependiente(I_pWD.cantFilas());
+
+//    cout << "termino independiente: \n";
+//    mostrar(terminoIndependiente);
+
+
+/*    float matriz[ORDEN][4]={
+            {0.0375, 0.465, 0.465, 0.0375},
+            {0.0375, 0.8875, 0.0375, 0.0375},
+            {0.0375, 0.465, 0.0375, 0.465},
+            {0.0375, 0.0375, 0.0375, 0.8875}
+    };
+*/
+    VectorMapMatrix matrizPrueba();
+
+    W.asignar(0, 0, 0.0375);
+    W.asignar(0, 1, 0.465);
+    W.asignar(0, 2, 0.465);
+    W.asignar(0, 3, 0.0375);
+    W.asignar(1, 0, 0.0375);
+    W.asignar(1, 1, 0.8875);
+    W.asignar(1, 2, 0.0375);
+    W.asignar(1, 3, 0.0375);
+    W.asignar(2, 0, 0.0375);
+    W.asignar(2, 1, 0.465);
+    W.asignar(2, 2, 0.0375);
+    W.asignar(2, 3, 0.465);
+    W.asignar(3, 0, 0.0375);
+    W.asignar(3, 1, 0.0375);
+    W.asignar(3, 2, 0.0375);
+    W.asignar(3, 3, 0.8875);
+
+    pair<vector<float>,short> ranking = D.EG(D, terminoIndependiente);
+
+//    cout << "ranking: \n";
+    vector<float> rk = ranking.first;
+
+//    cout << "status: " << ranking.second;
+
+//    mostrar(rk);
+
+
+
+/*    ranking.push_back(0.4);
     ranking[1] = 0.1;
     ranking[2] = 0.2;
     ranking[3] = 0.15;
-    ranking[4] = 0.15;
-    return ranking;
+    ranking[4] = 0.15;*/
+    return ranking.first;
 }
 
 
@@ -121,7 +191,13 @@ int main(int argc, char * argv[]) {
 
         VectorMapMatrix matrizDeConectividad = leerMatriz(nombreArchivo);
 
+        unsigned long start, end;
+        unsigned long startm, endm;
+        RDTSC_START(start);
         vector<float> ranking = pageRank(matrizDeConectividad, probabilidadDeSaltar);
+        RDTSC_STOP(end);
+        unsigned long delta = end - start;
+        cout << delta;
 
         escribirRanking(nombreArchivo + ".out", ranking, probabilidadDeSaltar);
     }
