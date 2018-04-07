@@ -7,7 +7,10 @@ c_j = sum(W) % c_j es un vector con la cantidad de links que referencian a  cada
 D = diag(arrayfun(@(x) dividir_si_es_posible(x),c_j)) 
 I=eye(n) % I = matriz identidad
 b = ones(n,1) % b = vector columna de de unos
-(I-p.*D*W)\b % resolvemos el sistema 
+sol = (I-p.*D*W)\b % resolvemos el sistema
+b_ordenado = sort(sol)
+escala = sum(b_ordenado) 
+arrayfun(@(x) x/escala,sol)
 
 %I-p.*D*W
 
@@ -27,7 +30,12 @@ function ret = construirMatriz(nombreArchivo)
     ret = zeros(n,n) %sparse
 
     for i = 1:size(posiciones_donde_hay_1,1)
-        for j = 1:size(posiciones_donde_hay_1,1)
-            ret(i,j) = 1
-        end
+        ret(posiciones_donde_hay_1(i,1),posiciones_donde_hay_1(i,2)) = 1
     end
+    ret;
+    
+    
+
+
+
+            
