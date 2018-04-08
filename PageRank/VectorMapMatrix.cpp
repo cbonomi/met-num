@@ -15,7 +15,7 @@ size_t VectorMapMatrix::cantFilas() const {return m.size();}
 size_t VectorMapMatrix::cantColumnas() const {return width;}
 
 void VectorMapMatrix::asignar(uint f, uint c, const double value) {
-    if (value==0) {
+    if (abs(value) < 0.1) {
         m[f].erase(c);
     } else if (f < m.size() and c < width) {
         m[f][c] = value;
@@ -36,10 +36,27 @@ double& VectorMapMatrix::operator[](pair<uint, uint> p) {
     if (p.first < m.size() and p.second < width) {
         return m[p.first][p.second];
     }
-	return m[0][0];//agregue esto solo para devolver algo en caso de que se invoque mal
+    return m[0][0];//agregue esto solo para devolver algo en caso de que se invoque mal
 }
 
 VectorMapMatrix VectorMapMatrix::operator+(VectorMapMatrix const &B) {
+    unsigned int f = 0;
+    unsigned int c = 0;
+    if(cantFilas() == B.cantFilas() and cantColumnas() == B.cantColumnas()) {
+        VectorMapMatrix result(cantFilas(), cantColumnas());
+        while (f < cantFilas()) {
+            while (c < cantColumnas()) {
+                result.asignar(f, c, at(f, c) + B.at(f, c));
+                c++;
+            }
+            c=0;
+            f++;
+        }
+        return result;
+    } else {
+        VectorMapMatrix result; //no se puede operar, devuelvo matriz 0x0.
+        return result;
+    }
     if(cantFilas() == B.cantFilas() and cantColumnas() == B.cantColumnas()) {
         VectorMapMatrix result(cantFilas(), cantColumnas());
         map<uint, double>::const_iterator it1 = m[0].begin();
@@ -99,7 +116,7 @@ VectorMapMatrix VectorMapMatrix::operator*(const VectorMapMatrix &B) {
                 // le doy el hint que empiece por alli.
                 c++; //cplusplus
             }
-		c=0;
+            c=0;
             f++;
         }
         return result;
@@ -175,16 +192,16 @@ VectorMapMatrix VectorMapMatrix::permutar(unsigned int j, unsigned int i){
 */
 
 pair<vector<double>,short> VectorMapMatrix::EG(const VectorMapMatrix &mat, vector<double> bb) {
-	unsigned int i,j;
+	unsigned int i,j,l;
 	vector<double> res(width,0);
 	short status = 0; //status default, el sistema tiene una unica solucion posible
 	double A_kk, A_jk;
 	VectorMapMatrix copy = VectorMapMatrix(mat);
-	VectorMapMatrix Mk = VectorMapMatrix(cantFilas(),width);
+	//VectorMapMatrix Mk = VectorMapMatrix(cantFilas(),width);
 	bool cont = false; //el bool da es false si en toda la columna de i en adelante es 0, es decir me tengo que saltear este paso
-	for(i = 0; i < copy.cantFilas(); i++){
+	/*for(i = 0; i < copy.cantFilas(); i++){
 		Mk.asignar(i,i,1.0);
-	}
+	}*/
 	for(i = 0; i < copy.cantFilas()-1; i++){ //itero sobre las filas, excepto la ultima porque ahi no tengo que hacer nada
 		for(j = i; j < copy.cantFilas(); j++){ //itero sobre las filas desde i en adelante, estaria por fijarme si tengo que hacer o no calculo en el paso i de la EG
 			if(copy.at(j,i) != 0){ //si no hay un 0 en la posicion j,i
@@ -203,15 +220,20 @@ pair<vector<double>,short> VectorMapMatrix::EG(const VectorMapMatrix &mat, vecto
 			if (!cont){break;} //si me tengo que saltear este paso no calculo nada
 			if(copy.at(j,i) != 0){
 				A_jk = copy.at(j,i);
-				Mk.asignar(j,i,(-1.0)*A_jk/A_kk);
+				map<unsigned int, double>::const_iterator it1 = copy[j].find(i);
+				while(it1 != copy[j].end()){
+					l = it1->first;
+					copy.asignar(j,l,copy.at(j,l)-(copy.at(i,l)*A_jk/A_kk));
+					it1++;
+				}
 				bb[j] -= A_jk/A_kk*bb[i]; //no me olvido de actualizar el vector b
 			} //A_jk y A_kk son los valores que determinan a las matrices Mk que uso para llegar desde A a U, sabiendo que PA = LU
 		}
 		if(cont){
-			copy = Mk*copy;
-			for(j = i + 1; j < copy.cantFilas(); j++){ //revierto la matriz Mk a I
+			//copy = Mk*copy;
+			/*for(j = i + 1; j < copy.cantFilas(); j++){ //revierto la matriz Mk a I
 				Mk.asignar(j,i,0.0);
-			}
+			}*/
 			cont = false;
 		}
 		

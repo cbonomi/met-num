@@ -13,12 +13,14 @@ VectorMapMatrix leerMatriz(string nombreArchivo) {
 
     entrada >> cantidadTotalDePaginas >> cantidadTotalDeLinks;
 
-    VectorMapMatrix ret(cantidadTotalDePaginas, cantidadTotalDeLinks);
+    VectorMapMatrix ret(cantidadTotalDePaginas, cantidadTotalDePaginas);
 
     int i, j;
 
-    while (entrada >> i >> j)
+    for (int k = 0; k<cantidadTotalDeLinks; k++) {
+        entrada >> i >> j;
         ret.asignar(i, j, 1);
+    }
 
     entrada.close();
 

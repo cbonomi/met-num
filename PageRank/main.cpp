@@ -9,7 +9,7 @@
 
 using namespace std;
 
-/*Matriz getMatrizProbabilidad(int sizeFila, int sizeColumna, double p) {
+/*Matriz getMatrizProbabilidad(int sizeFila, int sizeColumna, float p) {
     Matriz ret(sizeFila, sizeColumna);
     for (int i=0; i < sizeFila; i++) {
         for (int j=0; j<sizeColumna; j++) {
@@ -22,7 +22,7 @@ using namespace std;
 
 /*Matriz getVectorLinksSalientes(Matriz W) {
     Matriz ret(W.sizeFila, 1);
-    double acum;
+    float acum;
     for (int j=0; j<W.sizeColumna; j++) {
         acum = 0;
         for (int i=0; i < W.sizeFila; i++) {
@@ -81,6 +81,19 @@ void mostrar(vector<double> v) {
         cout << v.at(i) << "\n";
 }
 
+double sumar(vector<double> v) {
+    double ret = 0;
+    for (int i=0; i<v.size(); i++)
+        ret += v[i];
+}
+
+vector<double> dividir(vector<double> v, double num) {
+    vector<double> ret(v.size());
+    for (int i=0; i<v.size(); i++)
+        ret[i] = v[i]/num;
+    return ret;
+}
+
 /**
  * Aca implementacion del PageRank
  * @param matrizDeConectividad la matriz con los links entre las paginas
@@ -88,7 +101,7 @@ void mostrar(vector<double> v) {
  */
 vector<double> pageRank(VectorMapMatrix &W, double probabilidadDeSaltar) {
 
-    //   vector<double> ranking(5);
+    //   vector<float> ranking(5);
     cout << "Matriz W antes: \n";
     cout << "\n" << W << "\n\n";
 //    cout << "Matriz W despues: \n";
@@ -133,7 +146,7 @@ vector<double> pageRank(VectorMapMatrix &W, double probabilidadDeSaltar) {
 //    mostrar(terminoIndependiente);
 
 
-/*    double matriz[ORDEN][4]={
+/*    float matriz[ORDEN][4]={
             {0.0375, 0.465, 0.465, 0.0375},
             {0.0375, 0.8875, 0.0375, 0.0375},
             {0.0375, 0.465, 0.0375, 0.465},
@@ -142,31 +155,20 @@ vector<double> pageRank(VectorMapMatrix &W, double probabilidadDeSaltar) {
 */
     VectorMapMatrix matrizPrueba();
 
-    W.asignar(0, 0, 0.0375);
-    W.asignar(0, 1, 0.465);
-    W.asignar(0, 2, 0.465);
-    W.asignar(0, 3, 0.0375);
-    W.asignar(1, 0, 0.0375);
-    W.asignar(1, 1, 0.8875);
-    W.asignar(1, 2, 0.0375);
-    W.asignar(1, 3, 0.0375);
-    W.asignar(2, 0, 0.0375);
-    W.asignar(2, 1, 0.465);
-    W.asignar(2, 2, 0.0375);
-    W.asignar(2, 3, 0.465);
-    W.asignar(3, 0, 0.0375);
-    W.asignar(3, 1, 0.0375);
-    W.asignar(3, 2, 0.0375);
-    W.asignar(3, 3, 0.8875);
+    pair<vector<double>,short> ranking = I_pWD.EG(I_pWD, b);
 
-    pair<vector<double>,short> ranking = D.EG(D, b);
 
-//    cout << "ranking: \n";
+
+    //    cout << "ranking: \n";
     vector<double> rk = ranking.first;
+    double num = sumar(rk);
+    vector<double> rkNorm = dividir(rk, num);
+
 
 //    cout << "status: " << ranking.second;
 
-    mostrar(rk);
+    mostrar(rkNorm);
+    cout << "------";
 
 
 
@@ -198,7 +200,7 @@ int main(int argc, char * argv[]) {
         unsigned long delta = end - start;
         cout << delta;
 
-        escribirRanking(nombreArchivo + ".out", ranking, probabilidadDeSaltar);
+        // escribirRanking(nombreArchivo + ".out", ranking, probabilidadDeSaltar);
     }
 
     return 0;
