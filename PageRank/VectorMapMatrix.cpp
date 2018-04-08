@@ -188,68 +188,73 @@ VectorMapMatrix VectorMapMatrix::permutar(unsigned int j, unsigned int i){
 }
 
 pair<vector<double>,short> VectorMapMatrix::EG(const VectorMapMatrix &mat, vector<double> bb) {
-    unsigned int i,j;
-    vector<double> res(width,0);
-    short status = 0; //status default, el sistema tiene una unica solucion posible
-    double A_kk, A_jk;
-    VectorMapMatrix copy = VectorMapMatrix(mat);
-    VectorMapMatrix Mk = VectorMapMatrix(cantFilas(),width);
-    bool cont = false; //el bool da es false si en toda la columna de i en adelante es 0, es decir me tengo que saltear este paso
-    for(i = 0; i < copy.cantFilas(); i++){
-        Mk.asignar(i,i,1.0);
-    }
-    for(i = 0; i < copy.cantFilas()-1; i++){ //itero sobre las filas, excepto la ultima porque ahi no tengo que hacer nada
-        for(j = i; j < copy.cantFilas(); j++){ //itero sobre las filas desde i en adelante, estaria por fijarme si tengo que hacer o no calculo en el paso i de la EG
-            if(copy.at(j,i) != 0){ //si no hay un 0 en la posicion j,i
-                cont = true;
-                if(copy.at(i,i) == 0){
-                    copy[i].swap(copy[j]); //cambio de lugar las filas porque habia un 0 en la diagonal pero no en el resto de la columna
+	unsigned int i,j,l;
+	vector<double> res(width,0);
+	short status = 0; //status default, el sistema tiene una unica solucion posible
+	double A_kk, A_jk;
+	VectorMapMatrix copy = VectorMapMatrix(mat);
+	//VectorMapMatrix Mk = VectorMapMatrix(cantFilas(),width);
+	bool cont = false; //el bool da es false si en toda la columna de i en adelante es 0, es decir me tengo que saltear este paso
+	/*for(i = 0; i < copy.cantFilas(); i++){
+		Mk.asignar(i,i,1.0);
+	}*/
+	for(i = 0; i < copy.cantFilas()-1; i++){ //itero sobre las filas, excepto la ultima porque ahi no tengo que hacer nada
+		for(j = i; j < copy.cantFilas(); j++){ //itero sobre las filas desde i en adelante, estaria por fijarme si tengo que hacer o no calculo en el paso i de la EG
+			if(copy.at(j,i) != 0){ //si no hay un 0 en la posicion j,i
+				cont = true;
+				if(copy.at(i,i) == 0){
+					copy[i].swap(copy[j]); //cambio de lugar las filas porque habia un 0 en la diagonal pero no en el resto de la columna
                     double temp = bb[i];
                     bb[i] = bb[j];         //como se cambiaron de lugar las filas, también se cambian de lugar los valores de "bb"
                     bb[j] = temp;
                 }
-                break;
-            }
-        }
-        A_kk = copy.at(i,i);
-        for(j = i + 1; j < copy.cantFilas(); j++){ //cálculo del paso i si corresponde
-            if (!cont){break;} //si me tengo que saltear este paso no calculo nada
-            if(copy.at(j,i) != 0){
-                A_jk = copy.at(j,i);
-                Mk.asignar(j,i,(-1.0)*A_jk/A_kk);
-                bb[j] -= A_jk/A_kk*bb[i]; //no me olvido de actualizar el vector b
-            } //A_jk y A_kk son los valores que determinan a las matrices Mk que uso para llegar desde A a U, sabiendo que PA = LU
-        }
-        if(cont){
-            copy = Mk*copy;
-            for(j = i + 1; j < copy.cantFilas(); j++){ //revierto la matriz Mk a I
-                Mk.asignar(j,i,0.0);
-            }
-            cont = false;
-        }
-
-    }
-    for(i = 0; i < copy.cantFilas(); i++){
-        j = copy.cantFilas()-1-i;
-        if(copy.at(j,j) == 0 && bb[j] != 0){
-            status = -1; //el sistema es incompatible
-            break;
-        }
-        if(copy.at(j,j) == 0 && bb[j] == 0){
-            status = 1; //hay infinitos resultados
-            res[j] = 0;
-        }
-        else{
-            res[j] = bb[j]/copy.at(j,j); //tengo A_jj*x_j = b_j, paso dividiendo el A_jj
-
-            if (j!=0){
-                for(unsigned int l = 0; l < j; l++){
-                    bb[l] = bb[l] - res[j]*copy.at(l,j); //esto es importante, al b_l con l de 0 a j-1 le paso restando el A_lj*x_j, porque ya conozco el resultado de X_j, de forma que en la siguiente iteracion solo voy a tener algo de esta pinta A_jj*x_j = b_j
-                }
-            }
-        }
-    }
-    return make_pair(res,status);
+				break;
+			}
+		}
+		A_kk = copy.at(i,i);
+		for(j = i + 1; j < copy.cantFilas(); j++){ //cálculo del paso i si corresponde
+			if (!cont){break;} //si me tengo que saltear este paso no calculo nada
+			if(copy.at(j,i) != 0){
+				A_jk = copy.at(j,i);
+				map<uint, double>::const_iterator it1 = m[f].begin();
+				while(it1 != m[f].end()){
+					l = it1->first;
+					copy.asignar(j,l,copy.at(j,l)-(copy.at(i,l)*A_jk/A_kk));
+					it1++;
+				}
+				bb[j] -= A_jk/A_kk*bb[i]; //no me olvido de actualizar el vector b
+			} //A_jk y A_kk son los valores que determinan a las matrices Mk que uso para llegar desde A a U, sabiendo que PA = LU
+		}
+		if(cont){
+			//copy = Mk*copy;
+			/*for(j = i + 1; j < copy.cantFilas(); j++){ //revierto la matriz Mk a I
+				Mk.asignar(j,i,0.0);
+			}*/
+			cont = false;
+		}
+		
+	}
+	for(i = 0; i < copy.cantFilas(); i++){
+		j = copy.cantFilas()-1-i; 
+		if(copy.at(j,j) == 0 && bb[j] != 0){
+			status = -1; //el sistema es incompatible
+			break;
+		}
+		if(copy.at(j,j) == 0 && bb[j] == 0){
+			status = 1; //hay infinitos resultados
+			res[j] = 0;
+		}
+		else{
+			res[j] = bb[j]/copy.at(j,j); //tengo A_jj*x_j = b_j, paso dividiendo el A_jj
+			
+			if (j!=0){
+				for(unsigned int l = 0; l < j; l++){
+					bb[l] = bb[l] - res[j]*copy.at(l,j); //esto es importante, al b_l con l de 0 a j-1 le paso restando el A_lj*x_j, porque ya conozco el resultado de X_j, de forma que en la siguiente iteracion solo voy a tener algo de esta pinta A_jj*x_j = b_j
+				}
+			}
+		}
+	}
+	return make_pair(res,status);
 }
 
 pair<vector<double>,short> VectorMapMatrix::EGPP(vector<double> bb) {
