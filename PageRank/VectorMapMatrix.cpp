@@ -216,8 +216,8 @@ pair<vector<double>,short> VectorMapMatrix::EG(const VectorMapMatrix &mat, vecto
 			if (!cont){break;} //si me tengo que saltear este paso no calculo nada
 			if(copy.at(j,i) != 0){
 				A_jk = copy.at(j,i);
-				map<uint, double>::const_iterator it1 = m[f].begin();
-				while(it1 != m[f].end()){
+				map<unsigned int, double>::const_iterator it1 = copy[j].find(i);
+				while(it1 != copy[j].end()){
 					l = it1->first;
 					copy.asignar(j,l,copy.at(j,l)-(copy.at(i,l)*A_jk/A_kk));
 					it1++;
