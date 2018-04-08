@@ -3,6 +3,7 @@
 #include <vector>
 #include <tuple>
 #include <stdlib.h>
+#include <algorithm>
 #include "Matriz.h"
 #include "Util.h"
 #include "rdtsc.h"
@@ -18,9 +19,9 @@ using namespace std;
         }
     }
     return ret;
-}*/
+}
 
-/*Matriz getVectorLinksSalientes(Matriz W) {
+Matriz getVectorLinksSalientes(Matriz W) {
     Matriz ret(W.sizeFila, 1);
     float acum;
     for (int j=0; j<W.sizeColumna; j++) {
@@ -34,7 +35,7 @@ using namespace std;
     return ret;
 }*/
 
-VectorMapMatrix getMatrizPuntajesPonderados(VectorMapMatrix &W) {
+VectorMapMatrix getMatrizDiagonal(VectorMapMatrix &W) {
     VectorMapMatrix ret(W.cantFilas(), W.cantColumnas());
     double acum[W.cantColumnas()];
     for(uint i = 0; i < W.cantColumnas(); ++i)      acum[i] = 0;
@@ -49,7 +50,7 @@ VectorMapMatrix getMatrizPuntajesPonderados(VectorMapMatrix &W) {
 VectorMapMatrix getVectorProbabilidadesDeSalto(VectorMapMatrix &D, double p) {
     VectorMapMatrix ret(1, D.cantColumnas());
     double n = D.cantColumnas();
-    for (unsigned int j=0; j<D.cantColumnas(); j++) {
+    for (unsigned int j=0; j<n; j++) {
         if (D.at(j,j) != 0)
             ret.asignar(0, j, (double)((1-p)/n));
         else
@@ -58,23 +59,23 @@ VectorMapMatrix getVectorProbabilidadesDeSalto(VectorMapMatrix &D, double p) {
     return ret;
 }
 
-VectorMapMatrix getMatrizIdentidad(int tamano) {
+VectorMapMatrix getMatrizIdentidad(uint tamano) {
     VectorMapMatrix ret(tamano, tamano);
-    for (int i=0; i<tamano; i++) {
+    for (uint i=0; i<tamano; i++) {
         ret.asignar(i, i, 1);
     }
     return ret;
 }
 
-
-vector<double> getb(int tamano) {
+/*
+vector<double> getb(uint tamano) {
     vector<double> ret(tamano);
     for (int i=0; i<tamano; i++) {
         ret.assign(i, 1);
     }
     return ret;
 }
-
+*/
 
 void mostrar(vector<double> v) {
     for (int i=0; i<v.size(); i++)
@@ -82,9 +83,11 @@ void mostrar(vector<double> v) {
 }
 
 double sumar(vector<double> v) {
-    double ret = 0;
+    std::sort(v.begin(), v.end());      //Lo ordeno porque se van a sumar solo números positivos, y sumarlos en orden es
+    double suma = 0;                    //la forma más precisa de calcular la suma exacta.
     for (int i=0; i<v.size(); i++)
-        ret += v[i];
+        suma += v[i];
+    return suma;
 }
 
 vector<double> dividir(vector<double> v, double num) {
@@ -109,7 +112,7 @@ vector<double> pageRank(VectorMapMatrix &W, double probabilidadDeSaltar) {
 
 
     //
-    VectorMapMatrix D = getMatrizPuntajesPonderados(W);
+    VectorMapMatrix D = getMatrizDiagonal(W);
     cout << "Matriz D: \n";
     cout << D << "\n\n";
 
@@ -125,11 +128,11 @@ vector<double> pageRank(VectorMapMatrix &W, double probabilidadDeSaltar) {
 
 
     VectorMapMatrix z = getVectorProbabilidadesDeSalto(D, probabilidadDeSaltar);
-//    cout << "Matriz z: \n";
-//    cout << z << "\n\n";
+    cout << "Matriz z: \n";
+    cout << z << "\n\n";
     VectorMapMatrix I = getMatrizIdentidad(W.cantFilas());
-    cout << "Matriz I: \n";
-    cout << I << "\n\n";
+//    cout << "Matriz I: \n";
+//    cout << I << "\n\n";
     DW * (-1);
     cout << "Matriz -DW: \n";
     cout << DW << "\n\n";
@@ -140,7 +143,7 @@ vector<double> pageRank(VectorMapMatrix &W, double probabilidadDeSaltar) {
 
 
 
-    vector<double> b = getb(I_pWD.cantFilas());
+    vector<double> b(W.cantFilas(), 1);
 
 //    cout << "termino independiente: \n";
 //    mostrar(terminoIndependiente);

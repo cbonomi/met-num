@@ -347,11 +347,11 @@ string convertirAString(double num) {
 }
 
 int cantidadDeDigitosMaxima(VectorMapMatrix &M) {
-    int maximo = 0;
-    int cantDigitos = 0;
+    uint maximo = 0;
+    uint cantDigitos = 1;
     for (unsigned int i=0; i < M.cantFilas(); i++) {
-        for (unsigned int j=0; j< M.cantColumnas(); j++) {
-            cantDigitos = convertirAString(M.at(i,j)).length();
+        for (auto it=M[i].cbegin(); it != M[i].cend(); ++it) {
+            cantDigitos = convertirAString(it->second).length();
             if (maximo < cantDigitos)
                 maximo = cantDigitos;
         }
@@ -369,18 +369,9 @@ string agregarEspacios(double valor, int cantidadMaxima) {
 }
 
 std::ostream& operator << (std::ostream &o, VectorMapMatrix &B) {
-    string espacio;
     int cantDigitos = cantidadDeDigitosMaxima(B);
-    for (int i=0; i < cantDigitos; i++) {
-        espacio += " ";
-    }
-
     for (unsigned int i = 0; i < B.cantFilas(); i++) {
         for (unsigned int j = 0; j < B.cantColumnas(); j++) {
-            if (B.at(i, j) < 0)
-                espacio = " \t";
-            else
-                espacio = " \t \t \t";
             o << agregarEspacios(B.at(i, j), cantDigitos);
         }
         o << "\n";
@@ -389,9 +380,10 @@ std::ostream& operator << (std::ostream &o, VectorMapMatrix &B) {
 }
 
 void mostrar_matriz_por_consola(VectorMapMatrix& m, string nombre_de_la_matriz){
+    int cantDigitos = cantidadDeDigitosMaxima(m);
     std::cout << std::endl << nombre_de_la_matriz << " =  |";
     for(uint i = 0; i < m.cantFilas()*m.cantColumnas(); ++i){
-        std::cout << m.at(i/m.cantColumnas(), i%m.cantColumnas());
+        std::cout << agregarEspacios(m.at(i/m.cantColumnas(), i%m.cantColumnas()), cantDigitos);
         if(i%m.cantColumnas() < m.cantColumnas()-1)
             std::cout << ",  ";
         else {

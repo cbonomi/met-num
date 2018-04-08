@@ -153,5 +153,6 @@ int main(){
     mostrar_vector_por_consola(casi_b3_2, "Rand*sol_MatLab_3");
     mostrar_vector_por_consola(b3, "b3");
 
+    std::cout << Rand;
     return 0;
 }

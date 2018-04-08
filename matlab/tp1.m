@@ -30,11 +30,7 @@ function ret = construirMatriz(nombreArchivo)
     ret = zeros(n,n) %sparse
 
     for i = 1:size(posiciones_donde_hay_1,1)
-<<<<<<< HEAD
       ret(posiciones_donde_hay_1(i,:)) = 1
-=======
-        ret(posiciones_donde_hay_1(i,1),posiciones_donde_hay_1(i,2)) = 1
->>>>>>> af733c9fd1b3abd237303401d59e733f8aa64c7c
     end
     ret;
     
