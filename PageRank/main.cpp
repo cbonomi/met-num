@@ -36,15 +36,12 @@ using namespace std;
 
 VectorMapMatrix getMatrizPuntajesPonderados(VectorMapMatrix &W) {
     VectorMapMatrix ret(W.cantFilas(), W.cantColumnas());
-    double acum;
-    for (unsigned int j=0; j<W.cantColumnas(); j++) {
-        acum = 0;
-        for (unsigned int i=0; i < W.cantFilas(); i++) {
-            acum += W.at(i, j);
-        }
-        if (acum != 0)
-            ret.asignar(j, j, 1 / acum);
+    double acum[W.cantColumnas()];
+    for(uint i = 0; i < W.cantColumnas(); ++i)      acum[i] = 0;
+    for (unsigned int i=0; i<W.cantFilas(); ++i) {
+        for(auto it = W[i].begin(); it != W[i].end(); ++it)     acum[it->first] += it->second;
     }
+    for(uint i = 0; i < ret.cantFilas(); ++i)   ret.asignar(i, i, (acum[i] != 0 ? 1/acum[i] : 0));
     return ret;
 
 }

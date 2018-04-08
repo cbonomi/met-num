@@ -1,22 +1,18 @@
 #include "VectorMapMatrix.h"
+#include <cmath>
 #include <math.h>
 #include <list>
 #include <utility>
 #include <sstream>
+#include <iostream>
 
-VectorMapMatrix::VectorMapMatrix() {
-    width = 0;
-}
+VectorMapMatrix::VectorMapMatrix() : width(0) {}
 
 VectorMapMatrix::VectorMapMatrix(uint h, uint w) : m(h, map<uint,double>()) , width(w) {}
 
-size_t VectorMapMatrix::cantFilas() const {
-    return m.size();
-}
+size_t VectorMapMatrix::cantFilas() const {return m.size();}
 
-size_t VectorMapMatrix::cantColumnas() const {
-    return width;
-}
+size_t VectorMapMatrix::cantColumnas() const {return width;}
 
 void VectorMapMatrix::asignar(uint f, uint c, const double value) {
     if (value==0) {
@@ -42,6 +38,7 @@ double& VectorMapMatrix::operator[](pair<uint, uint> p) {
     }
 	return m[0][0];//agregue esto solo para devolver algo en caso de que se invoque mal
 }
+
 VectorMapMatrix VectorMapMatrix::operator+(VectorMapMatrix const &B) {
     if(cantFilas() == B.cantFilas() and cantColumnas() == B.cantColumnas()) {
         VectorMapMatrix result(cantFilas(), cantColumnas());
@@ -72,7 +69,7 @@ VectorMapMatrix VectorMapMatrix::operator+(VectorMapMatrix const &B) {
         return result;
     }
 }
-
+/*
 VectorMapMatrix VectorMapMatrix::operator*(const VectorMapMatrix &B) {
     if(cantColumnas() == B.cantFilas()) {
         VectorMapMatrix result(cantFilas(), B.cantColumnas());
@@ -88,7 +85,7 @@ VectorMapMatrix VectorMapMatrix::operator*(const VectorMapMatrix &B) {
                     it2++;
                 }
                 it1++;
-            }	
+            }
             f++;
         }
         f = 0;
@@ -110,8 +107,8 @@ VectorMapMatrix VectorMapMatrix::operator*(const VectorMapMatrix &B) {
         return VectorMapMatrix(); //No existe solución.
     }
 }
-
-VectorMapMatrix VectorMapMatrix::mult(VectorMapMatrix const &B){
+*/
+VectorMapMatrix VectorMapMatrix::operator*(const VectorMapMatrix &B){
     if(cantColumnas() == B.cantFilas()) {
         VectorMapMatrix result(cantFilas(), B.cantColumnas());
         for(uint i = 0; i < cantFilas(); ++i) { //Recorro las filas de A.
@@ -136,6 +133,15 @@ VectorMapMatrix VectorMapMatrix::mult(VectorMapMatrix const &B){
     }
 }
 
+vector<double> VectorMapMatrix::operator*(const vector<double>& v){
+    VectorMapMatrix vect_como_matriz(v.size(), 1);
+    for(uint i = 0; i <v.size(); ++i) vect_como_matriz.asignar(i, 0, v[i]);
+    vect_como_matriz = (*this)*vect_como_matriz;
+    vector<double> res(cantFilas());
+    for(uint i = 0; i < res.size(); ++i) res[i] = vect_como_matriz.at(i, 0);
+    return res;
+}
+
 void VectorMapMatrix::operator*(double valor) {
     double acum = 0;
     for (unsigned int f = 0; f<cantFilas(); f++) {
@@ -150,7 +156,7 @@ void VectorMapMatrix::operator*(double valor) {
         }
     }
 }
-
+/*
 VectorMapMatrix VectorMapMatrix::triangularMatriz() {}
 
 VectorMapMatrix VectorMapMatrix::permutar(unsigned int j, unsigned int i){
@@ -165,10 +171,8 @@ VectorMapMatrix VectorMapMatrix::permutar(unsigned int j, unsigned int i){
 		}
 	}
 	return p;
-
-
-
 }
+*/
 
 pair<vector<double>,short> VectorMapMatrix::EG(const VectorMapMatrix &mat, vector<double> bb) {
 	unsigned int i,j;
@@ -241,17 +245,17 @@ pair<vector<double>,short> VectorMapMatrix::EGPP(vector<double> bb) {
     short status = 0; //status default, el sistema tiene una unica solucion posible
     VectorMapMatrix copy = VectorMapMatrix(*this);
     for(i = 0; i < copy.cantFilas()-1; i++){ //itero sobre las filas, excepto la ultima porque ahi no tengo que hacer nada
-        double maximo_abs = copy.at(i,i);    //en cada iteración es igual al número más grande (en valor absoluto) del resto de la columna.
-        unsigned int fila_del_maximo = i;
+        double maximo_abs = 0;    //en cada iteración es igual al número más grande (en valor absoluto) del resto de la columna.
+        unsigned int fila_del_maximo;
         list<pair<uint, double> > filas_a_ser_restadas;
         auto iter_de_la_lista_apuntando_al_maximo = filas_a_ser_restadas.begin();
-        for(j = i+1; j < copy.cantFilas(); ++j){ //itero sobre las filas desde i+1 en adelante, para encontrar el valor de "maximo_abs".
+        for(j = i; j < copy.cantFilas(); ++j){ //itero sobre las filas desde i+1 en adelante, para encontrar el valor de "maximo_abs".
             // De paso me guardo las filas en las que encuentro un valor != 0 en la columna "i" y me guardo dicho valor.
             map<unsigned int, double>::const_iterator iter = copy[j].find(i);
             if (iter != copy[j].cend()){    //Si el valor está definido, ie, es != 0:
                 const double& a_ji = iter->second;        //lo llamo a_ji y...
                 filas_a_ser_restadas.emplace_back(j, a_ji);  //guardo la fila en la que está y su valor.
-                if(fabs(a_ji) > fabs(maximo_abs)){ //busco el máximo en valor absoluto
+                if(abs(a_ji) > abs(maximo_abs)){ //busco el máximo en valor absoluto
                     maximo_abs = a_ji;
                     fila_del_maximo = j;
                     iter_de_la_lista_apuntando_al_maximo = --filas_a_ser_restadas.end(); //El máximo es el último agregado.
@@ -260,14 +264,15 @@ pair<vector<double>,short> VectorMapMatrix::EGPP(vector<double> bb) {
         }
         if(maximo_abs != 0) {    //Si el resto de la columna son todos 0´s (maximo == 0) no necesito hacer más nada. Si hay algún valor no nulo:
             copy[i].swap(copy[fila_del_maximo]); //cambio de lugar las filas para que a_ii sea el número con valor absoluto más grande.
-            swap(bb[i], bb[j]);                  //como se cambiaron de lugar las filas, también se cambian de lugar los valores de "bb"
+            swap(bb[i], bb[fila_del_maximo]);                  //como se cambiaron de lugar las filas, también se cambian de lugar los valores de "bb"
             filas_a_ser_restadas.erase(iter_de_la_lista_apuntando_al_maximo);//También debo sacar de la lista de filas a restar, aquella que contiene al máximo y...
             if (filas_a_ser_restadas.begin()->first == i)    //si la fila "i" está en la lista...
                 filas_a_ser_restadas.begin()->first = fila_del_maximo;    //debe actualizarse el índice de su fila (pues la swapé).
             double& a_ii = maximo_abs;
-            for (auto iter_lista = ++filas_a_ser_restadas.begin(); iter_lista != filas_a_ser_restadas.end(); ++iter_lista) {
+            for (auto iter_lista = filas_a_ser_restadas.begin(); iter_lista != filas_a_ser_restadas.end(); ++iter_lista) {
                 double& a_ji = iter_lista->second;
-                copy.resta_de_filas(iter_lista->first, a_ji / a_ii, i);
+                copy.resta_de_filas(iter_lista->first, a_ji/a_ii, i);
+                bb[iter_lista->first] -= (a_ji/a_ii)*bb[i];
             }
         }
     }
@@ -293,8 +298,7 @@ pair<vector<double>,short> VectorMapMatrix::EGPP(vector<double> bb) {
 }
 
 void VectorMapMatrix::resta_de_filas(uint fila_a_modificar, double escalar, uint fila_para_restar){
-    if(escalar == 0) return;
-    else {
+    if(escalar != 0){   //Si el escalar es 0 no hago nada.
         auto it1 = m[fila_a_modificar].begin();
         auto fin1 = m[fila_a_modificar].end();
         auto it2 = m[fila_para_restar].begin();
@@ -302,8 +306,9 @@ void VectorMapMatrix::resta_de_filas(uint fila_a_modificar, double escalar, uint
         while (it2 != fin2) {  //Mientras no haya acabado la fila para restar:
             double resultado_de_la_resta = -escalar * (it2->second); //empiezo restando lo que hay que restar
             while (it1 != fin1 && it1->first < it2->first) ++it1;
-            if (it1->first == it2->first) resultado_de_la_resta += it1->second; //si hay algo distinto de 0 en la coordenada a modificar, lo sumo
-            if (resultado_de_la_resta != 0) m[fila_a_modificar][it2->first] = resultado_de_la_resta;    //si el resultado de la resta no es 0, lo defino en el diccionario/fila
+            if (it1->first == it2->first) resultado_de_la_resta += it1->second; //Si hay algo distinto de 0 en la coordenada a modificar, lo sumo.
+            if (abs(resultado_de_la_resta) > pow(10, -6)) m[fila_a_modificar][it2->first] = resultado_de_la_resta;    //Si el resultado de la resta no es 0, lo defino en el diccionario/fila.
+            else m[fila_a_modificar].erase(it2->first); //Si es 0, lo borro del diccionario/fila.
             ++it2;
         }
     }
@@ -359,4 +364,37 @@ std::ostream& operator << (std::ostream &o, VectorMapMatrix &B) {
         o << "\n";
     }
     return o;
+}
+
+void mostrar_matriz_por_consola(VectorMapMatrix& m, string nombre_de_la_matriz){
+    std::cout << std::endl << nombre_de_la_matriz << " =  |";
+    for(uint i = 0; i < m.cantFilas()*m.cantColumnas(); ++i){
+        std::cout << m.at(i/m.cantColumnas(), i%m.cantColumnas());
+        if(i%m.cantColumnas() < m.cantColumnas()-1)
+            std::cout << ",  ";
+        else {
+            std::cout << "|" << std::endl;
+            if(i != m.cantFilas()*m.cantColumnas()-1){
+                string espacios = "";
+                for(uint i = 0; i < nombre_de_la_matriz.size(); ++i) espacios += " ";
+                std::cout << espacios << "    |";
+            }
+        }
+    }
+}
+
+void mostrar_vector_por_consola(vector<double>& v, string nombre_del_vector){
+    std::cout << std::endl << nombre_del_vector << " = [";
+    for(uint i = 0; i < v.size()-1; ++i) std::cout << v[i] << ", ";
+    if(!v.empty()) std::cout << v[v.size()-1] << "]";
+}
+
+VectorMapMatrix vector2matrix(vector<double>& v, uint cant_filas){
+    if(v.size()%cant_filas == 0){
+        uint cant_columnas = v.size()/cant_filas;
+        VectorMapMatrix Res(cant_filas, cant_columnas);
+        for(uint i = 0; i < v.size(); ++i) Res.asignar(i/cant_columnas, i%cant_columnas, v[i]);
+        return Res;
+    }
+    return VectorMapMatrix();
 }

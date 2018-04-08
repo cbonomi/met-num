@@ -33,19 +33,23 @@ public:
 
     VectorMapMatrix operator+(VectorMapMatrix const &B);
 
-    VectorMapMatrix operator*(VectorMapMatrix const &B);
+    VectorMapMatrix operator*(const VectorMapMatrix &B);
 
-    VectorMapMatrix mult(VectorMapMatrix const &B);
+    vector<double> operator*(const vector<double> &v);
+
+    //VectorMapMatrix mult(VectorMapMatrix const &B);
+
+    //vector<double> mult(vector<double>&);
 
     void operator*(double valor);
 
-    VectorMapMatrix triangularMatriz();
+    //VectorMapMatrix triangularMatriz();
 
-	pair<vector<double>,short> EG(const VectorMapMatrix& mat, vector<double> b);
+	pair<vector<double>,short> EG(const VectorMapMatrix& mat, vector<double> b);    //Resolución de sist. de ec. mediante eliminación gaussiana (solo para matrices cuadradas).
 
-	pair<vector<double>,short> EGPP(vector<double>);
+	pair<vector<double>,short> EGPP(vector<double>);    //Resolución de sist. de ec. mediante eliminación gaussiana con pivoteo parcial (solo para matrices cuadradas).
 	
-	VectorMapMatrix permutar(unsigned int j, unsigned int i);
+	//VectorMapMatrix permutar(unsigned int j, unsigned int i);
 private:
     vector<map<uint, double> > m; //La matriz va a tener un vector vertical, de arboles rojo negro horizontales.
     size_t width;
@@ -54,5 +58,11 @@ private:
 };
 
 ostream& operator << (ostream &o, VectorMapMatrix &B);
+
+void mostrar_matriz_por_consola(VectorMapMatrix& m, string nombre_de_la_matriz);
+
+void mostrar_vector_por_consola(vector<double>& v, string nombre_del_vector);
+
+VectorMapMatrix vector2matrix(vector<double>& v, uint cant_filas);
 
 #endif //PAGERANK_VECTORMAPMATRIX_H
