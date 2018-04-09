@@ -15,7 +15,7 @@ size_t VectorMapMatrix::cantFilas() const {return m.size();}
 size_t VectorMapMatrix::cantColumnas() const {return width;}
 
 void VectorMapMatrix::asignar(uint f, uint c, const double value) {
-    if (abs(value) < 0.1) {
+    if (abs(value) < 0.0001) {
         m[f].erase(c);
     } else if (f < m.size() and c < width) {
         m[f][c] = value;
@@ -218,12 +218,14 @@ pair<vector<double>,short> VectorMapMatrix::EG(const VectorMapMatrix &mat, vecto
 		A_kk = copy.at(i,i);
 		for(j = i + 1; j < copy.cantFilas(); j++){ //cálculo del paso i si corresponde
 			if (!cont){break;} //si me tengo que saltear este paso no calculo nada
-			if(copy.at(j,i) != 0){
+			if(abs(copy.at(j,i)) > 0.0001){
 				A_jk = copy.at(j,i);
 				map<unsigned int, double>::const_iterator it1 = copy[j].find(i);
 				while(it1 != copy[j].end()){
 					l = it1->first;
-					copy.asignar(j,l,copy.at(j,l)-(copy.at(i,l)*A_jk/A_kk));
+					if(abs(copy.at(j,l)) > 0.0001){
+						copy.asignar(j,l,copy.at(j,l)-(copy.at(i,l)*A_jk/A_kk));
+					}
 					it1++;
 				}
 				bb[j] -= A_jk/A_kk*bb[i]; //no me olvido de actualizar el vector b
