@@ -116,14 +116,14 @@ vector<double> pageRank(VectorMapMatrix &W, double probabilidadDeSaltar) {
     cout << "Matriz D: \n";
     cout << D << "\n\n";
 
-    VectorMapMatrix DW = D*W;
+    VectorMapMatrix WD = W*D;
     cout << "Matriz DW: \n";
-    cout << DW << "\n\n";
+    cout << WD << "\n\n";
 
-    DW * probabilidadDeSaltar;
+    WD * probabilidadDeSaltar;
 
     cout << "Matriz pDW: \n";
-    cout << DW << "\n\n";
+    cout << WD << "\n\n";
 
 
 
@@ -133,11 +133,11 @@ vector<double> pageRank(VectorMapMatrix &W, double probabilidadDeSaltar) {
     VectorMapMatrix I = getMatrizIdentidad(W.cantFilas());
 //    cout << "Matriz I: \n";
 //    cout << I << "\n\n";
-    DW * (-1);
+    WD * (-1);
     cout << "Matriz -DW: \n";
-    cout << DW << "\n\n";
+    cout << WD << "\n\n";
 
-    VectorMapMatrix I_pWD = I + DW;
+    VectorMapMatrix I_pWD = I + WD;
     cout << "Matriz I_pWD: \n";
     cout << I_pWD << "\n\n";
 

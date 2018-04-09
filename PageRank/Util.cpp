@@ -19,7 +19,7 @@ VectorMapMatrix leerMatriz(string nombreArchivo) {
 
     for (int k = 0; k<cantidadTotalDeLinks; k++) {
         entrada >> i >> j;
-        ret.asignar(i, j, 1);
+        ret.asignar(j-1, i-1, 1);
     }
 
     entrada.close();
