@@ -15,7 +15,7 @@ size_t VectorMapMatrix::cantFilas() const {return m.size();}
 size_t VectorMapMatrix::cantColumnas() const {return width;}
 
 void VectorMapMatrix::asignar(uint f, uint c, const double value) {
-    if (abs(value) < 0.0001) {
+    if (abs(value) < 0.00001) {
         m[f].erase(c);
     } else if (f < m.size() and c < width) {
         m[f][c] = value;
@@ -204,9 +204,9 @@ pair<vector<double>,short> VectorMapMatrix::EG(const VectorMapMatrix &mat, vecto
 	}*/
 	for(i = 0; i < copy.cantFilas()-1; i++){ //itero sobre las filas, excepto la ultima porque ahi no tengo que hacer nada
 		for(j = i; j < copy.cantFilas(); j++){ //itero sobre las filas desde i en adelante, estaria por fijarme si tengo que hacer o no calculo en el paso i de la EG
-			if(copy.at(j,i) != 0){ //si no hay un 0 en la posicion j,i
+			if(abs(copy.at(j,i)) > 0.00001){ //si no hay un 0 en la posicion j,i
 				cont = true;
-				if(copy.at(i,i) == 0){
+				if(abs(copy.at(i,i)) <= 0.00001){
 					copy[i].swap(copy[j]); //cambio de lugar las filas porque habia un 0 en la diagonal pero no en el resto de la columna
                     double temp = bb[i];
                     bb[i] = bb[j];         //como se cambiaron de lugar las filas, también se cambian de lugar los valores de "bb"
@@ -218,12 +218,12 @@ pair<vector<double>,short> VectorMapMatrix::EG(const VectorMapMatrix &mat, vecto
 		A_kk = copy.at(i,i);
 		for(j = i + 1; j < copy.cantFilas(); j++){ //cálculo del paso i si corresponde
 			if (!cont){break;} //si me tengo que saltear este paso no calculo nada
-			if(abs(copy.at(j,i)) > 0.0001){
+			if(abs(copy.at(j,i)) > 0.00001){
 				A_jk = copy.at(j,i);
 				map<unsigned int, double>::const_iterator it1 = copy[j].find(i);
 				while(it1 != copy[j].end()){
 					l = it1->first;
-					if(abs(copy.at(j,l)) > 0.0001){
+					if(abs(copy.at(j,l)) > 0.00001){
 						copy.asignar(j,l,copy.at(j,l)-(copy.at(i,l)*A_jk/A_kk));
 					}
 					it1++;
