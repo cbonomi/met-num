@@ -11,7 +11,7 @@
 using namespace std;
 
 
-bool MEDIR = true;
+bool MEDIR = false;
 unsigned int CANTIDAD_MEDICIONES = 20;
 
 
@@ -112,8 +112,8 @@ vector<double> pageRank(VectorMapMatrix &W, double probabilidadDeSaltar) {
 
     pair<vector<double>,short> ranking = I_pWD.EG(I_pWD, b);
     vector<double> rn = normalizar(ranking);
-    //mostrar(rn);
-    return ranking.first;
+    mostrar(rn);
+    return rn;
 }
 
 
