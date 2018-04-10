@@ -112,7 +112,7 @@ vector<double> pageRank(VectorMapMatrix &W, double probabilidadDeSaltar) {
 
     pair<vector<double>,short> ranking = I_pWD.EG(I_pWD, b);
     vector<double> rn = normalizar(ranking);
-    mostrar(rn);
+    //mostrar(rn);
     return rn;
 }
 
