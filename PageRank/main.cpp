@@ -10,30 +10,10 @@
 
 using namespace std;
 
-/*Matriz getMatrizProbabilidad(int sizeFila, int sizeColumna, float p) {
-    Matriz ret(sizeFila, sizeColumna);
-    for (int i=0; i < sizeFila; i++) {
-        for (int j=0; j<sizeColumna; j++) {
-            if (i=j)
-                ret.set(i, j, p);
-        }
-    }
-    return ret;
-}
 
-Matriz getVectorLinksSalientes(Matriz W) {
-    Matriz ret(W.sizeFila, 1);
-    float acum;
-    for (int j=0; j<W.sizeColumna; j++) {
-        acum = 0;
-        for (int i=0; i < W.sizeFila; i++) {
-            acum += W.get(i, j);
-            ret.set(i, j, p);
-        }
-        ret.set(j, 0, acum);
-    }
-    return ret;
-}*/
+bool MEDIR = true;
+unsigned int CANTIDAD_MEDICIONES = 20;
+
 
 VectorMapMatrix getMatrizDiagonal(VectorMapMatrix &W) {
     VectorMapMatrix ret(W.cantFilas(), W.cantColumnas());
@@ -67,16 +47,6 @@ VectorMapMatrix getMatrizIdentidad(uint tamano) {
     return ret;
 }
 
-/*
-vector<double> getb(uint tamano) {
-    vector<double> ret(tamano);
-    for (int i=0; i<tamano; i++) {
-        ret.assign(i, 1);
-    }
-    return ret;
-}
-*/
-
 void mostrar(vector<double> v) {
     for (int i=0; i<v.size(); i++)
         cout << v.at(i) << "\n";
@@ -97,6 +67,13 @@ vector<double> dividir(vector<double> v, double num) {
     return ret;
 }
 
+vector<double> normalizar(pair<vector<double>,short> ranking) {
+    vector<double> rk = ranking.first;
+    double num = sumar(rk);
+    vector<double> rkNorm = dividir(rk, num);
+    return rkNorm;
+}
+
 /**
  * Aca implementacion del PageRank
  * @param matrizDeConectividad la matriz con los links entre las paginas
@@ -104,82 +81,38 @@ vector<double> dividir(vector<double> v, double num) {
  */
 vector<double> pageRank(VectorMapMatrix &W, double probabilidadDeSaltar) {
 
-    //   vector<float> ranking(5);
-    cout << "Matriz W antes: \n";
-    cout << "\n" << W << "\n\n";
-//    cout << "Matriz W despues: \n";
-//    cout << "\n" << W << "\n\n";
-
-
-    //
     VectorMapMatrix D = getMatrizDiagonal(W);
-    cout << "Matriz D: \n";
-    cout << D << "\n\n";
 
     VectorMapMatrix WD = W*D;
-    cout << "Matriz DW: \n";
-    cout << WD << "\n\n";
 
     WD * probabilidadDeSaltar;
 
-    cout << "Matriz pDW: \n";
-    cout << WD << "\n\n";
-
-
-
-    VectorMapMatrix z = getVectorProbabilidadesDeSalto(D, probabilidadDeSaltar);
-    cout << "Matriz z: \n";
-    cout << z << "\n\n";
     VectorMapMatrix I = getMatrizIdentidad(W.cantFilas());
-//    cout << "Matriz I: \n";
-//    cout << I << "\n\n";
+
     WD * (-1);
-    cout << "Matriz -DW: \n";
-    cout << WD << "\n\n";
 
     VectorMapMatrix I_pWD = I + WD;
-    cout << "Matriz I_pWD: \n";
-    cout << I_pWD << "\n\n";
-
-
 
     vector<double> b(W.cantFilas(), 1);
 
-//    cout << "termino independiente: \n";
-//    mostrar(terminoIndependiente);
 
-
-/*    float matriz[ORDEN][4]={
-            {0.0375, 0.465, 0.465, 0.0375},
-            {0.0375, 0.8875, 0.0375, 0.0375},
-            {0.0375, 0.465, 0.0375, 0.465},
-            {0.0375, 0.0375, 0.0375, 0.8875}
-    };
-*/
-    VectorMapMatrix matrizPrueba();
+    if (MEDIR) {
+        unsigned long delta = 0;
+        pair<vector<double>,short> ranking;
+        for (int i = 0; i < CANTIDAD_MEDICIONES; i++) {
+            unsigned long start, end;
+            RDTSC_START(start);
+            I_pWD.EG(I_pWD, b);
+            RDTSC_STOP(end);
+            delta += end - start;
+            normalizar(ranking);
+        }
+        cout << delta / CANTIDAD_MEDICIONES;
+    }
 
     pair<vector<double>,short> ranking = I_pWD.EG(I_pWD, b);
-
-
-
-    //    cout << "ranking: \n";
-    vector<double> rk = ranking.first;
-    double num = sumar(rk);
-    vector<double> rkNorm = dividir(rk, num);
-
-
-//    cout << "status: " << ranking.second;
-
-    mostrar(rkNorm);
-    cout << "------";
-
-
-
-/*    ranking.push_back(0.4);
-    ranking[1] = 0.1;
-    ranking[2] = 0.2;
-    ranking[3] = 0.15;
-    ranking[4] = 0.15;*/
+    vector<double> rn = normalizar(ranking);
+    //mostrar(rn);
     return ranking.first;
 }
 
@@ -195,15 +128,9 @@ int main(int argc, char * argv[]) {
 
         VectorMapMatrix matrizDeConectividad = leerMatriz(nombreArchivo);
 
-        unsigned long start, end;
-        unsigned long startm, endm;
-        RDTSC_START(start);
         vector<double> ranking = pageRank(matrizDeConectividad, probabilidadDeSaltar);
-        RDTSC_STOP(end);
-        unsigned long delta = end - start;
-        cout << delta;
 
-        // escribirRanking(nombreArchivo + ".out", ranking, probabilidadDeSaltar);
+        escribirRanking(nombreArchivo + ".out", ranking, probabilidadDeSaltar);
     }
 
     return 0;
