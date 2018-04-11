@@ -217,7 +217,7 @@ pair<vector<double>,short> VectorMapMatrix::EG(const VectorMapMatrix &mat, vecto
 		}*/
 		A_kk = copy.at(i,i);
 		for(j = i + 1; j < copy.cantFilas(); j++){ //cálculo del paso i si corresponde
-			if (abs(A_kk) <= 0.00001){break;} //si me tengo que saltear este paso no calculo nada
+			//if (abs(A_kk) <= 0.00001){break;} //si me tengo que saltear este paso no calculo nada
 			if(abs(copy.at(j,i)) > 0.00001){//si el elemento j,i es 0 no hago nada en la fila j
 				A_jk = copy.at(j,i);
 				map<unsigned int, double>::const_iterator it1 = copy[j].find(i);
