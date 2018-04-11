@@ -198,12 +198,12 @@ pair<vector<double>,short> VectorMapMatrix::EG(const VectorMapMatrix &mat, vecto
 	double A_kk, A_jk;
 	VectorMapMatrix copy = VectorMapMatrix(mat);
 	//VectorMapMatrix Mk = VectorMapMatrix(cantFilas(),width);
-	bool cont = false; //el bool da es false si en toda la columna de i en adelante es 0, es decir me tengo que saltear este paso
+	//bool cont = false; //el bool da es false si en toda la columna de i en adelante es 0, es decir me tengo que saltear este paso
 	/*for(i = 0; i < copy.cantFilas(); i++){
 		Mk.asignar(i,i,1.0);
 	}*/
 	for(i = 0; i < copy.cantFilas()-1; i++){ //itero sobre las filas, excepto la ultima porque ahi no tengo que hacer nada
-		for(j = i; j < copy.cantFilas(); j++){ //itero sobre las filas desde i en adelante, estaria por fijarme si tengo que hacer o no calculo en el paso i de la EG
+		/*for(j = i; j < copy.cantFilas(); j++){ //itero sobre las filas desde i en adelante, estaria por fijarme si tengo que hacer o no calculo en el paso i de la EG
 			if(abs(copy.at(j,i)) > 0.00001){ //si no hay un 0 en la posicion j,i
 				cont = true;
 				if(abs(copy.at(i,i)) <= 0.00001){
@@ -214,11 +214,11 @@ pair<vector<double>,short> VectorMapMatrix::EG(const VectorMapMatrix &mat, vecto
                 }
 				break;
 			}
-		}
+		}*/
 		A_kk = copy.at(i,i);
 		for(j = i + 1; j < copy.cantFilas(); j++){ //cálculo del paso i si corresponde
-			if (!cont){break;} //si me tengo que saltear este paso no calculo nada
-			if(abs(copy.at(j,i)) > 0.00001){
+			if (abs(A_kk) <= 0.00001){break;} //si me tengo que saltear este paso no calculo nada
+			if(abs(copy.at(j,i)) > 0.00001){//si el elemento j,i es 0 no hago nada en la fila j
 				A_jk = copy.at(j,i);
 				map<unsigned int, double>::const_iterator it1 = copy[j].find(i);
 				while(it1 != copy[j].end()){
@@ -231,13 +231,13 @@ pair<vector<double>,short> VectorMapMatrix::EG(const VectorMapMatrix &mat, vecto
 				bb[j] -= A_jk/A_kk*bb[i]; //no me olvido de actualizar el vector b
 			} //A_jk y A_kk son los valores que determinan a las matrices Mk que uso para llegar desde A a U, sabiendo que PA = LU
 		}
-		if(cont){
-			//copy = Mk*copy;
-			/*for(j = i + 1; j < copy.cantFilas(); j++){ //revierto la matriz Mk a I
+		/*if(cont){
+			copy = Mk*copy;
+			for(j = i + 1; j < copy.cantFilas(); j++){ //revierto la matriz Mk a I
 				Mk.asignar(j,i,0.0);
-			}*/
+			}
 			cont = false;
-		}
+		}*/
 		
 	}
 	for(i = 0; i < copy.cantFilas(); i++){
