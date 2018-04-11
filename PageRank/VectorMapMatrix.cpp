@@ -223,9 +223,7 @@ pair<vector<double>,short> VectorMapMatrix::EG(const VectorMapMatrix &mat, vecto
 				map<unsigned int, double>::const_iterator it1 = copy[j].find(i);
 				while(it1 != copy[j].end()){
 					l = it1->first;
-					if(abs(copy.at(j,l)) > 0.00001){
-						copy.asignar(j,l,copy.at(j,l)-(copy.at(i,l)*A_jk/A_kk));
-					}
+					copy.asignar(j,l,copy.at(j,l)-(copy.at(i,l)*A_jk/A_kk));
 					it1++;
 				}
 				bb[j] -= A_jk/A_kk*bb[i]; //no me olvido de actualizar el vector b
