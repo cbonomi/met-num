@@ -220,8 +220,8 @@ pair<vector<double>,short> VectorMapMatrix::EG(const VectorMapMatrix &mat, vecto
 			//if (abs(A_kk) <= 0.00001){break;} //si me tengo que saltear este paso no calculo nada
 			if(abs(copy.at(j,i)) > 0.00001){//si el elemento j,i es 0 no hago nada en la fila j
 				A_jk = copy.at(j,i);
-				map<unsigned int, double>::const_iterator it1 = copy[j].find(i);
-				while(it1 != copy[j].end()){
+				map<unsigned int, double>::const_iterator it1 = copy[i].find(i);
+				while(it1 != copy[i].end()){
 					l = it1->first;
 					copy.asignar(j,l,copy.at(j,l)-(copy.at(i,l)*A_jk/A_kk));
 					it1++;
