@@ -8,13 +8,11 @@ from random import randrange
 
 
 ##------------Configuracion------------------------------------------------------##
-path_dir_de_trabajo = ''
-nombre_archivo_entrada = path_dir_de_trabajo + 'entradas/entrada'
+path_dir_de_trabajo = '/home/christian/'
 path_entradas = path_dir_de_trabajo + 'entradas/'
-nombre_page_rank = './tp1'
+path_salidas = path_dir_de_trabajo + 'salidas/'
+nombre_page_rank = 'tp1'
 probabilidad_de_salto = '0.2'
-nombre_archivo_mediciones = path_dir_de_trabajo + 'mediciones.csv'
-nombre_archivo_grafico_medicion = path_dir_de_trabajo + 'mediciones.png'
 ##------------Configuracion------------------------------------------------------##
 
 
@@ -43,16 +41,20 @@ def generar_grafo_aleatorio(cantidad_nodos, probabilidad_de_link):
                 grafo[i][j] = hay_link(probabilidad_de_link)
     return grafo
 
+#A = generar_grafo_aleatorio(20, 0.3)
+#print(A)
+
+#print(type(A))
+#print(A.shape[0])
+
 # genera los archivos de entrada con matrices de 2 páginas hasta 'cantidad_maxima_de_paginas', 
 # la probabilidad que haya un link entre dos nodos es 'probabilidad_de_link'
 # 'nombre_archivo_entrada' es el path y el prefijo con el que va a generar los nombres de los 
 # archivos de entrada, a esos prefijos les va a concatenar la cantidad de páginas que tiene
-# el grafo de páginas.
-def generar_entradas(nombre_archivo_entrada, cantidad_maxima_de_paginas, probabilidad_de_link):
-    grafo = generar_grafo_aleatorio(cantidad_maxima_de_paginas, probabilidad_de_link)
-    
-    for i in range(2, cantidad_maxima_de_paginas):
-        cantidad_maxima_de_paginas, probabilidad_de_link
+# el grafo de páginas. Agregue el parametro paso que indica la cantidad de nodos en que crece el grafo.
+def generar_entradas(nombre_archivo_entrada, grafo, paso):       
+    cantidad_maxima_de_paginas = grafo.shape[0]
+    for i in range(paso, cantidad_maxima_de_paginas, paso):
         subgrafo = grafo[0:i, 0:i]
         f =open(nombre_archivo_entrada + str(i).zfill(5), 'w')
         salida = generar_salida_matriz(subgrafo);
@@ -78,34 +80,64 @@ def escribir_salidas(nombre_archivo_entrada, nombre_archivo_salida):
     
 
 
-generar_entradas(nombre_archivo_entrada, 20, 0.3)
+
 
 ##------------Generamos archivos de entrada--------------------------------------##
 
 ##---------Tomamos mediciones utilizando la entrada generada previamente y las guardamos---------##
+
+
+
+def tomarMediciones(nombre_archivo_entrada, grafo, paso, nombre_archivo_mediciones):    
+    o=os.popen('rm ' + path_entradas + '*.out')
+    generar_entradas(nombre_archivo_entrada, grafo, paso)    
+    o=os.popen('ls ' + path_entradas).read()
     
-o=os.popen('ls ' + path_entradas).read()
-nombres = o.splitlines()
-print(path_dir_de_trabajo + nombre_page_rank + ' ' +  path_entradas + 'entrada0001' + ' ' + probabilidad_de_salto)
-f =open(nombre_archivo_mediciones, 'w')
-f.write('cantidad de páginas,mediciones \n')
-a = [len(nombres)]
-i = 1
-for nombre in nombres:
-    i = i + 1
-    f.write(str(i) + ',' + os.popen(path_dir_de_trabajo + nombre_page_rank + ' ' +  path_entradas + nombre + ' ' + probabilidad_de_salto).read() + '\n')
-f.close()
+    nombres = o.splitlines()
 
-df = pd.read_csv(nombre_archivo_mediciones)
+    f =open(nombre_archivo_mediciones, 'w')
+    f.write('cantidad de nodos, ciclos de reloj \n')
+    a = [len(nombres)]
+    i = 1
+    for nombre in nombres:
+        i = i + 1
+        f.write(str(i*paso) + ',' + os.popen(path_dir_de_trabajo + nombre_page_rank + ' ' +  path_entradas + nombre + ' ' + probabilidad_de_salto).read() + '\n')
+    f.close()
 
-df.head()
+    df = pd.read_csv(nombre_archivo_mediciones)
+
+    df.head()
     
     
 ##---------Tomamos mediciones utilizando la entrada generada previamente---------##
 
 ##---------Generamos el grafico a partir de las mediciones-----------------------##
-grafico_mediciones = df.plot(kind='line')
-plt.show()
-fig = grafico_mediciones.get_figure()
-fig.savefig(nombre_archivo_grafico_medicion)
+def graficar(nombre_archivo_mediciones, nombre_grafico_medicion, titulo, tipo_de_grafico):
+    df = pd.read_csv(nombre_archivo_mediciones)
+    grafico_mediciones = df.plot(kind=tipo_de_grafico)
+    fig = grafico_mediciones.get_figure()
+    plt.title(titulo)
+    plt.xlabel(df.columns[0])
+    plt.ylabel(df.columns[1])
+    plt.grid(True)
+
+    plt.show()
+    fig.savefig(nombre_archivo_grafico_medicion)
 ##---------Generamos el grafico a partir de las mediciones-----------------------##
+
+##--------------Procedimiento general para cualquier grafo-----------------------##
+# 1.- Consta de tres partes creamos un grafo de cualquier forma.
+# 2.- Tomamos las mediciones de este grafo y las guardamos en un archivo.
+# 3.- Creamos un grafico con estas mediciones.
+
+# 1.- generamos un grafo de con cantidad maxima de paginas = 20 y probabilidad de link entre los nodos i, j 0.3
+grafo = generar_grafo_aleatorio(100, 0.3)
+# 2.- tomamos mediciones con la entrada pasada en el primer parametro, el grafo en el segundo y con un paso de 10
+#     y guardamos estas mediciones en el archivo de salida indicado en el ultimo parametro.
+tomarMediciones(path_dir_de_trabajo + 'entradas/entrada', grafo, 10, path_dir_de_trabajo + 'mediciones2.csv')
+# 3.- graficamos las mediciones del archivo pasado como parametro, y la guardamos en el archivo pasado como segundo
+#     parametro, el tipo de grafico que queremos se lo indicamos con el tercer parameto.
+graficar(path_dir_de_trabajo + 'mediciones2.csv', path_dir_de_trabajo + 'mediciones.png', 'Medicion en ciclos de reloj', 'line')
+
+
+
