@@ -191,84 +191,86 @@ VectorMapMatrix VectorMapMatrix::permutar(unsigned int j, unsigned int i){
 }
 */
 
-pair<vector<double>,short> VectorMapMatrix::EG(const VectorMapMatrix &mat, const VectorMapMatrix& mat2, vector<double> bb) {
-	unsigned int i,j,l;
+pair<vector<double>,short> VectorMapMatrix::EG(const VectorMapMatrix& thisTranspuestaAux, vector<double> bb) {
+	unsigned int f1,f2,c; //f1 será la fila eliminadora, f2 la fila que eliminaremos, c la columna que estamos operando.
 	vector<double> res(width,0);
 	short status = 0; //status default, el sistema tiene una unica solucion posible
-	double A_kk, A_jk;
-	VectorMapMatrix copy = VectorMapMatrix(mat);
-	VectorMapMatrix copy2 = VectorMapMatrix(mat2);
+	double A_kk, A_f2k;
+	VectorMapMatrix A = VectorMapMatrix(*this);
+	VectorMapMatrix A_t = VectorMapMatrix(thisTranspuestaAux); // A_t es la transpuesta de A, servirá para leer de las columnas más facilmente.
 	//VectorMapMatrix Mk = VectorMapMatrix(cantFilas(),width);
-	//bool cont = false; //el bool da es false si en toda la columna de i en adelante es 0, es decir me tengo que saltear este paso
-	/*for(i = 0; i < copy.cantFilas(); i++){
-		Mk.asignar(i,i,1.0);
+	//bool cont = false; //el bool da es false si en toda la columna de f1 en adelante es 0, es decir me tengo que saltear este paso
+	/*for(f1 = 0; f1 < A.cantFilas(); f1++){
+		Mk.asignar(f1,f1,1.0);
 	}*/
 
 
-	for(i = 0; i < copy.cantFilas()-1; i++){ //itero sobre las filas, excepto la ultima porque ahi no tengo que hacer nada
-		/*for(j = i; j < copy.cantFilas(); j++){ //itero sobre las filas desde i en adelante, estaria por fijarme si tengo que hacer o no calculo en el paso i de la EG
-			if(abs(copy.at(j,i)) > 0.00001){ //si no hay un 0 en la posicion j,i
+	for(f1 = 0; f1 < A.cantFilas()-1; f1++){ //itero sobre las filas, y elimino el resto de las filas respecto de f1. La última no es necesario.
+		/*for(f2 = f1; f2 < A.cantFilas(); f2++){ //itero sobre las filas desde f1 en adelante, estaria por fijarme si tengo que hacer o no calculo en el paso f1 de la EG
+			if(abs(A.at(f2,f1)) > 0.00001){ //si no hay un 0 en la posicion f2,f1
 				cont = true;
-				if(abs(copy.at(i,i)) <= 0.00001){
-					copy[i].swap(copy[j]); //cambio de lugar las filas porque habia un 0 en la diagonal pero no en el resto de la columna
-                    double temp = bb[i];
-                    bb[i] = bb[j];         //como se cambiaron de lugar las filas, también se cambian de lugar los valores de "bb"
-                    bb[j] = temp;
+				if(abs(A.at(f1,f1)) <= 0.00001){
+					A[f1].swap(A[f2]); //cambio de lugar las filas porque habia un 0 en la diagonal pero no en el resto de la columna
+                    double temp = bb[f1];
+                    bb[f1] = bb[f2];         //como se cambiaron de lugar las filas, también se cambian de lugar los valores de "bb"
+                    bb[f2] = temp;
                 }
 				break;
 			}
 		}*/
-		A_kk = copy.at(i,i);
-		map<unsigned int, double>::const_iterator it2 = copy2[i].find(i);
-		while(it2 != copy2[i].end()){ //cálculo del paso i si corresponde
-			j = it2->first;
+		A_kk = A.at(f1,f1); //de la diagonal
+		map<unsigned int, double>::const_iterator it_f2 = A_t[f1].find(f1);
+		it_f2++; //Busco la primera fila que deba eliminarse.
+		while(it_f2 != A_t[f1].end()){ //cálculo del paso f1 si corresponde
+			f2 = it_f2->first;
 			//if (abs(A_kk) <= 0.00001){break;} //si me tengo que saltear este paso no calculo nada
-			//if(it2 != copy[j].end() && it2->first == i){//si el elemento j,i es 0 no hago nada en la fila j
-			if (i!=j){
-			A_jk = copy.at(j,i);
-			map<unsigned int, double>::const_iterator it1 = copy[i].find(i);
-			while(it1 != copy[i].end()){				
-				l = it1->first;
-				
-				if(i!=l){
-					copy.asignar(j,l,copy.at(j,l)-(copy.at(i,l)*A_jk/A_kk));
-					copy2.asignar(l,j,copy.at(j,l));
-				}
+			//if(it_f2 != A[f2].end() && it_f2->first == f1){//si el elemento f2,f1 es 0 no hago nada en la fila f2
+            A_f2k = A.at(f2,f1); // el de la fila a eliminar en la columna donde pondriamos 0.
+			map<unsigned int, double>::const_iterator it_c = A[f1].find(f1);
+
+			it_c++; //La primera columna tendra 0 y es innecesario eliminarla, supondremos que ya lo está.
+			while(it_c != A[f1].end()){
+			    c = it_c->first;
+
+			    A.asignar(f2,c,A.at(f2,c)-(A.at(f1,c)*A_f2k/A_kk));
+			    A_t.asignar(c,f2,A.at(f2,c));
+
 					
 					
-				it1++;
+			    it_c++;
 			}
-			bb[j] -= A_jk/A_kk*bb[i];} //no me olvido de actualizar el vector b
-			it2++;
-			//} //A_jk y A_kk son los valores que determinan a las matrices Mk que uso para llegar desde A a U, sabiendo que PA = LU
+			bb[f2] -= A_f2k/A_kk*bb[f1]; //no me olvido de actualizar el vector b
+
+            it_f2++; //} //A_f2k y A_kk son los valores que determinan a las matrices Mk que uso para llegar desde A a U, sabiendo que PA = LU
 		}
 		/*if(cont){
-			copy = Mk*copy;
-			for(j = i + 1; j < copy.cantFilas(); j++){ //revierto la matriz Mk a I
-				Mk.asignar(j,i,0.0);
+			A = Mk*A;
+			for(f2 = f1 + 1; f2 < A.cantFilas(); f2++){ //revierto la matriz Mk a I
+				Mk.asignar(f2,f1,0.0);
 			}
 			cont = false;
 		}*/
 		
 	}
-	for(i = 0; i < copy.cantFilas(); i++){
-		j = copy.cantFilas()-1-i; 
-		if(copy.at(j,j) == 0 && bb[j] != 0){
+	for(f1 = A.cantFilas()-1; f1 < A.cantFilas(); f1--){
+		if(A.at(f1,f1) == 0 && bb[f1] != 0){
 			status = -1; //el sistema es incompatible
 			break;
 		}
-		if(copy.at(j,j) == 0 && bb[j] == 0){
+		if(A.at(f1,f1) == 0 && bb[f1] == 0){
 			status = 1; //hay infinitos resultados
-			res[j] = 0;
+			res[f1] = 0;
 		}
 		else{
-			res[j] = bb[j]/copy.at(j,j); //tengo A_jj*x_j = b_j, paso dividiendo el A_jj
+			res[f1] = bb[f1];
 			
-			if (j!=0){
-				for(unsigned int l = 0; l < j; l++){
-					bb[l] = bb[l] - res[j]*copy.at(l,j); //esto es importante, al b_l con l de 0 a j-1 le paso restando el A_lj*x_j, porque ya conozco el resultado de X_j, de forma que en la siguiente iteracion solo voy a tener algo de esta pinta A_jj*x_j = b_j
+			if (f1!=A.cantFilas()-1){
+				for(unsigned int l = A.cantFilas()-1; l > f1; l--){
+					res[f1] -= res[l]*A.at(f1,l); //esto es importante, al b_l con c de 0 a f2-1 le paso restando el A_lj*x_j, porque ya conozco el resultado de X_j, de forma que en la siguiente iteracion solo voy a tener algo de esta pinta A_jj*x_j = b_j
 				}
 			}
+
+            res[f1] /= A.at(f1,f1); //tengo A_jj*x_j = b_j, paso dividiendo el A_jj
 		}
 	}
 	return make_pair(res,status);

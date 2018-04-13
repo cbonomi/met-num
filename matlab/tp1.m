@@ -1,6 +1,6 @@
 function tp1()
 format short
-nombreArchivo = "/home/christian/tests_tp1/test_aleatorio.txt"
+nombreArchivo = "/home/leandro/CLionProjects/met-num-TP1/tests_tp1/test_15_segundos.txt"
 p = 0.85
 W = construirMatriz(nombreArchivo)%importdata("/home/christian/matriz"," ",0); %nos guardamos la matriz del archivo en W
 [m,n] = size(W) % n tiene el tamaño de W
