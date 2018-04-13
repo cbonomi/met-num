@@ -115,7 +115,7 @@ vector<double> pageRank(VectorMapMatrix &W, double probabilidadDeSaltar) {
 
     vector<double> b(W.cantFilas(), 1);
 
-
+	
     //if (MEDIR) {
         unsigned long delta = 0;
         //pair<vector<double>,short> ranking;
@@ -127,7 +127,7 @@ vector<double> pageRank(VectorMapMatrix &W, double probabilidadDeSaltar) {
             delta += end - start;
             vector<double> rn = normalizar(ranking);
         //}
-        cout << delta / CANTIDAD_MEDICIONES;
+       // cout << delta / CANTIDAD_MEDICIONES;
     //}
 
     //pair<vector<double>,short> ranking = I_pWD.EG(I_pWD, b);

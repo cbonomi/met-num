@@ -203,6 +203,8 @@ pair<vector<double>,short> VectorMapMatrix::EG(const VectorMapMatrix &mat, const
 	/*for(i = 0; i < copy.cantFilas(); i++){
 		Mk.asignar(i,i,1.0);
 	}*/
+
+
 	for(i = 0; i < copy.cantFilas()-1; i++){ //itero sobre las filas, excepto la ultima porque ahi no tengo que hacer nada
 		/*for(j = i; j < copy.cantFilas(); j++){ //itero sobre las filas desde i en adelante, estaria por fijarme si tengo que hacer o no calculo en el paso i de la EG
 			if(abs(copy.at(j,i)) > 0.00001){ //si no hay un 0 en la posicion j,i
@@ -217,20 +219,25 @@ pair<vector<double>,short> VectorMapMatrix::EG(const VectorMapMatrix &mat, const
 			}
 		}*/
 		A_kk = copy.at(i,i);
-		map<unsigned int, double>::const_iterator it2 = copy2[i].find(i+1);
+		map<unsigned int, double>::const_iterator it2 = copy2[i].find(i);
 		while(it2 != copy2[i].end()){ //cálculo del paso i si corresponde
 			j = it2->first;
 			//if (abs(A_kk) <= 0.00001){break;} //si me tengo que saltear este paso no calculo nada
 			//if(it2 != copy[j].end() && it2->first == i){//si el elemento j,i es 0 no hago nada en la fila j
+			if (i!=j){
 			A_jk = copy.at(j,i);
 			map<unsigned int, double>::const_iterator it1 = copy[i].find(i);
-			while(it1 != copy[i].end()){
-					l = it1->first;
-					copy.asignar(j,l,copy.at(j,l)-(copy.at(i,l)*A_jk/A_kk));
-					copy2.asignar(l,j,copy.at(j,l)-(copy.at(i,l)*A_jk/A_kk));
-					it1++;
+			while(it1 != copy[i].end()){				
+				l = it1->first;
+				copy.asignar(j,l,copy.at(j,l)-(copy.at(i,l)*A_jk/A_kk));
+				if(i!=l){
+					copy2.asignar(l,j,copy.at(j,l));
+				}
+					
+					
+				it1++;
 			}
-			bb[j] -= A_jk/A_kk*bb[i]; //no me olvido de actualizar el vector b
+			bb[j] -= A_jk/A_kk*bb[i];} //no me olvido de actualizar el vector b
 			it2++;
 			//} //A_jk y A_kk son los valores que determinan a las matrices Mk que uso para llegar desde A a U, sabiendo que PA = LU
 		}
