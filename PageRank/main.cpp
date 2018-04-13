@@ -96,14 +96,22 @@ vector<double> pageRank(VectorMapMatrix &W, double probabilidadDeSaltar) {
     VectorMapMatrix D = getMatrizDiagonal(W);
 
     VectorMapMatrix WD = W*D;
+    
+    VectorMapMatrix DWt = D*Wt;
 
     WD * probabilidadDeSaltar;
+    
+    DWt * probabilidadDeSaltar;
 
     VectorMapMatrix I = getMatrizIdentidad(W.cantFilas());
 
     WD * (-1);
+    
+    DWt * (-1);
 
     VectorMapMatrix I_pWD = I + WD;
+    
+    VectorMapMatrix I_pDWt = I + DWt;
 
     vector<double> b(W.cantFilas(), 1);
 
@@ -114,7 +122,7 @@ vector<double> pageRank(VectorMapMatrix &W, double probabilidadDeSaltar) {
         //for (int i = 0; i < CANTIDAD_MEDICIONES; i++) {
             unsigned long start, end;
             RDTSC_START(start);
-            pair<vector<double>,short> ranking = I_pWD.EG(I_pWD, b);
+            pair<vector<double>,short> ranking = I_pWD.EG(I_pWD, I_pDWt, b);
             RDTSC_STOP(end);
             delta += end - start;
             vector<double> rn = normalizar(ranking);
