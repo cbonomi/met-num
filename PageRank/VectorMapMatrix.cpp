@@ -266,11 +266,11 @@ pair<vector<double>,short> VectorMapMatrix::EG(const VectorMapMatrix& thisTransp
 			
 			if (f1!=A.cantFilas()-1){
 				for(unsigned int l = A.cantFilas()-1; l > f1; l--){
-					res[f1] -= res[l]*A.at(f1,l); //esto es importante, al b_l con c de 0 a f2-1 le paso restando el A_lj*x_j, porque ya conozco el resultado de X_j, de forma que en la siguiente iteracion solo voy a tener algo de esta pinta A_jj*x_j = b_j
+					res[f1] -= res[l]*A.at(f1,l); //esto es importante, al res le resto todos los valores ya hallados, multiplicados por los coeficientes de la ecuacion en f1.
 				}
 			}
 
-            res[f1] /= A.at(f1,f1); //tengo A_jj*x_j = b_j, paso dividiendo el A_jj
+            res[f1] /= A.at(f1,f1); //tengo finalmente divido por el coeficiente que tengo en la diagonal, para hallar el resultado en f1.
 		}
 	}
 	return make_pair(res,status);
