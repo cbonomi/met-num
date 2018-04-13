@@ -48,6 +48,8 @@ public:
 	pair<vector<double>,short> EG(const VectorMapMatrix& mat, vector<double> b);    //Resolución de sist. de ec. mediante eliminación gaussiana (solo para matrices cuadradas).
 
 	pair<vector<double>,short> EGPP(vector<double>);    //Resolución de sist. de ec. mediante eliminación gaussiana con pivoteo parcial (solo para matrices cuadradas).
+
+    pair<vector<double>,short> EG_particuar(vector<double> bb);    //Especial para I-pWD
 	
 	//VectorMapMatrix permutar(unsigned int j, unsigned int i);
 private:

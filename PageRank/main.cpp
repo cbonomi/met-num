@@ -11,8 +11,8 @@
 using namespace std;
 
 
-bool MEDIR = false;
-unsigned int CANTIDAD_MEDICIONES = 20;
+bool MEDIR = true;
+unsigned int CANTIDAD_MEDICIONES = 1;
 
 
 VectorMapMatrix getMatrizDiagonal(VectorMapMatrix &W) {
@@ -85,32 +85,37 @@ vector<double> pageRank(VectorMapMatrix &W, double probabilidadDeSaltar) {
 
     VectorMapMatrix WD = W*D;
 
-    WD * probabilidadDeSaltar;
+    WD * (-probabilidadDeSaltar);
 
     VectorMapMatrix I = getMatrizIdentidad(W.cantFilas());
-
-    WD * (-1);
 
     VectorMapMatrix I_pWD = I + WD;
 
     vector<double> b(W.cantFilas(), 1);
 
+    pair<vector<double>,short> ranking;
 
     if (MEDIR) {
-        unsigned long delta = 0;
-        pair<vector<double>,short> ranking;
+        //unsigned long delta1 = 0;
+        unsigned long delta2 = 0;
         for (int i = 0; i < CANTIDAD_MEDICIONES; i++) {
             unsigned long start, end;
+//            RDTSC_START(start);
+//            I_pWD.EG(I_pWD, b);
+//            RDTSC_STOP(end);
+//            delta1 += end - start;
             RDTSC_START(start);
-            I_pWD.EG(I_pWD, b);
+            I_pWD.EGPP(b);
             RDTSC_STOP(end);
-            delta += end - start;
+            delta2 += end - start;
             normalizar(ranking);
         }
-        cout << delta / CANTIDAD_MEDICIONES;
+        //cout << delta / CANTIDAD_MEDICIONES;
+        //cout << delta1 << endl;
+        cout << delta2 << endl;
     }
 
-    pair<vector<double>,short> ranking = I_pWD.EG(I_pWD, b);
+    //pair<vector<double>,short> ranking = I_pWD.EG(I_pWD, b);
     vector<double> rn = normalizar(ranking);
     //mostrar(rn);
     return rn;
