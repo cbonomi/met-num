@@ -229,8 +229,9 @@ pair<vector<double>,short> VectorMapMatrix::EG(const VectorMapMatrix &mat, const
 			map<unsigned int, double>::const_iterator it1 = copy[i].find(i);
 			while(it1 != copy[i].end()){				
 				l = it1->first;
-				copy.asignar(j,l,copy.at(j,l)-(copy.at(i,l)*A_jk/A_kk));
+				
 				if(i!=l){
+					copy.asignar(j,l,copy.at(j,l)-(copy.at(i,l)*A_jk/A_kk));
 					copy2.asignar(l,j,copy.at(j,l));
 				}
 					
