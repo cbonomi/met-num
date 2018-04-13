@@ -117,14 +117,14 @@ vector<double> pageRank(VectorMapMatrix &W, double probabilidadDeSaltar) {
 
 	
     //if (MEDIR) {
-        unsigned long delta = 0;
+        //unsigned long delta = 0;
         //pair<vector<double>,short> ranking;
         //for (int i = 0; i < CANTIDAD_MEDICIONES; i++) {
-            unsigned long start, end;
-            RDTSC_START(start);
+            //unsigned long start, end;
+            //RDTSC_START(start);
             pair<vector<double>,short> ranking = I_pWD.EG(I_pWD, I_pDWt, b);
-            RDTSC_STOP(end);
-            delta += end - start;
+           // RDTSC_STOP(end);
+            //delta += end - start;
             vector<double> rn = normalizar(ranking);
         //}
        // cout << delta / CANTIDAD_MEDICIONES;
