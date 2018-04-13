@@ -12,6 +12,7 @@ using namespace std;
 
 
 bool MEDIR = true;
+
 unsigned int CANTIDAD_MEDICIONES = 1;
 
 
@@ -23,6 +24,16 @@ VectorMapMatrix getMatrizDiagonal(VectorMapMatrix &W) {
         for(auto it = W[i].begin(); it != W[i].end(); ++it)     acum[it->first] += it->second;
     }
     for(uint i = 0; i < ret.cantFilas(); ++i)   ret.asignar(i, i, (acum[i] != 0 ? 1/acum[i] : 0));
+    return ret;
+
+}
+
+VectorMapMatrix getTraspuesta(VectorMapMatrix &W) {
+    VectorMapMatrix ret(W.cantFilas(), W.cantColumnas());
+    double acum[W.cantColumnas()];
+    for(uint i = 0; i < W.cantColumnas(); ++i)
+        for (unsigned int j=0; j<W.cantFilas(); ++j)
+            ret.asignar(j, i, W.at(i, j));
     return ret;
 
 }
@@ -81,42 +92,46 @@ vector<double> normalizar(pair<vector<double>,short> ranking) {
  */
 vector<double> pageRank(VectorMapMatrix &W, double probabilidadDeSaltar) {
 
+    VectorMapMatrix Wt = getTraspuesta(W);
+
     VectorMapMatrix D = getMatrizDiagonal(W);
 
     VectorMapMatrix WD = W*D;
+    
+    VectorMapMatrix DWt = D*Wt;
 
-    WD * (-probabilidadDeSaltar);
+    WD * probabilidadDeSaltar;
+    
+    DWt * probabilidadDeSaltar;
 
     VectorMapMatrix I = getMatrizIdentidad(W.cantFilas());
 
+    WD * (-1);
+
+    DWt * (-1);
+
     VectorMapMatrix I_pWD = I + WD;
+    
+    VectorMapMatrix I_pDWt = I + DWt;
 
     vector<double> b(W.cantFilas(), 1);
 
-    pair<vector<double>,short> ranking;
-
-    if (MEDIR) {
-        //unsigned long delta1 = 0;
-        unsigned long delta2 = 0;
-        for (int i = 0; i < CANTIDAD_MEDICIONES; i++) {
-            unsigned long start, end;
-//            RDTSC_START(start);
-//            I_pWD.EG(I_pWD, b);
-//            RDTSC_STOP(end);
-//            delta1 += end - start;
-            RDTSC_START(start);
-            I_pWD.EGPP(b);
-            RDTSC_STOP(end);
-            delta2 += end - start;
-            normalizar(ranking);
-        }
-        //cout << delta / CANTIDAD_MEDICIONES;
-        //cout << delta1 << endl;
-        cout << delta2 << endl;
-    }
+    //if (MEDIR) {
+        //unsigned long delta = 0;
+        //pair<vector<double>,short> ranking;
+        //for (int i = 0; i < CANTIDAD_MEDICIONES; i++) {
+            //unsigned long start, end;
+            //RDTSC_START(start);
+            pair<vector<double>,short> ranking = I_pWD.EG(I_pWD, I_pDWt, b);
+           // RDTSC_STOP(end);
+            //delta += end - start;
+            vector<double> rn = normalizar(ranking);
+        //}
+       // cout << delta / CANTIDAD_MEDICIONES;
+    //}
 
     //pair<vector<double>,short> ranking = I_pWD.EG(I_pWD, b);
-    vector<double> rn = normalizar(ranking);
+    //vector<double> rn = normalizar(ranking);
     //mostrar(rn);
     return rn;
 }
