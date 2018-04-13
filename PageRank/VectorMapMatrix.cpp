@@ -191,12 +191,13 @@ VectorMapMatrix VectorMapMatrix::permutar(unsigned int j, unsigned int i){
 }
 */
 
-pair<vector<double>,short> VectorMapMatrix::EG(const VectorMapMatrix &mat, vector<double> bb) {
+pair<vector<double>,short> VectorMapMatrix::EG(const VectorMapMatrix &mat, const VectorMapMatrix& mat2, vector<double> bb) {
 	unsigned int i,j,l;
 	vector<double> res(width,0);
 	short status = 0; //status default, el sistema tiene una unica solucion posible
 	double A_kk, A_jk;
 	VectorMapMatrix copy = VectorMapMatrix(mat);
+	VectorMapMatrix copy2 = VectorMapMatrix(mat2);
 	//VectorMapMatrix Mk = VectorMapMatrix(cantFilas(),width);
 	//bool cont = false; //el bool da es false si en toda la columna de i en adelante es 0, es decir me tengo que saltear este paso
 	/*for(i = 0; i < copy.cantFilas(); i++){
@@ -216,19 +217,22 @@ pair<vector<double>,short> VectorMapMatrix::EG(const VectorMapMatrix &mat, vecto
 			}
 		}*/
 		A_kk = copy.at(i,i);
-		for(j = i + 1; j < copy.cantFilas(); j++){ //cálculo del paso i si corresponde
+		map<unsigned int, double>::const_iterator it2 = copy2[i].find(i+1);
+		while(it2 != copy2[i].end()){ //cálculo del paso i si corresponde
+			j = it2->first;
 			//if (abs(A_kk) <= 0.00001){break;} //si me tengo que saltear este paso no calculo nada
-			map<unsigned int, double>::const_iterator it2 = copy[j].find(i);
-			if(it2 != copy[j].end() && it2->first == i){//si el elemento j,i es 0 no hago nada en la fila j
-				A_jk = copy.at(j,i);
-				map<unsigned int, double>::const_iterator it1 = copy[i].find(i);
-				while(it1 != copy[i].end()){
+			//if(it2 != copy[j].end() && it2->first == i){//si el elemento j,i es 0 no hago nada en la fila j
+			A_jk = copy.at(j,i);
+			map<unsigned int, double>::const_iterator it1 = copy[i].find(i);
+			while(it1 != copy[i].end()){
 					l = it1->first;
 					copy.asignar(j,l,copy.at(j,l)-(copy.at(i,l)*A_jk/A_kk));
+					copy2.asignar(l,j,copy.at(j,l)-(copy.at(i,l)*A_jk/A_kk));
 					it1++;
-				}
-				bb[j] -= A_jk/A_kk*bb[i]; //no me olvido de actualizar el vector b
-			} //A_jk y A_kk son los valores que determinan a las matrices Mk que uso para llegar desde A a U, sabiendo que PA = LU
+			}
+			bb[j] -= A_jk/A_kk*bb[i]; //no me olvido de actualizar el vector b
+			it2++;
+			//} //A_jk y A_kk son los valores que determinan a las matrices Mk que uso para llegar desde A a U, sabiendo que PA = LU
 		}
 		/*if(cont){
 			copy = Mk*copy;
