@@ -3,100 +3,158 @@
 #include <vector>
 #include <tuple>
 #include <stdlib.h>
-#include "VectorMapMatrix.h"
+#include <algorithm>
+#include "Matriz.h"
+#include "Util.h"
 #include "rdtsc.h"
 
-int main() {
-   
+using namespace std;
+
+
+bool MEDIR = true;
+unsigned int CANTIDAD_MEDICIONES = 20;
+
+
+VectorMapMatrix getMatrizDiagonal(VectorMapMatrix &W) {
+    VectorMapMatrix ret(W.cantFilas(), W.cantColumnas());
+    double acum[W.cantColumnas()];
+    for(uint i = 0; i < W.cantColumnas(); ++i)      acum[i] = 0;
+    for (unsigned int i=0; i<W.cantFilas(); ++i) {
+        for(auto it = W[i].begin(); it != W[i].end(); ++it)     acum[it->first] += it->second;
+    }
+    for(uint i = 0; i < ret.cantFilas(); ++i)   ret.asignar(i, i, (acum[i] != 0 ? 1/acum[i] : 0));
+    return ret;
+
+}
+
+VectorMapMatrix getTraspuesta(VectorMapMatrix &W) {
+    VectorMapMatrix ret(W.cantFilas(), W.cantColumnas());
+    double acum[W.cantColumnas()];
+    for(uint i = 0; i < W.cantColumnas(); ++i)
+        for (unsigned int j=0; j<W.cantFilas(); ++j)
+            ret.asignar(j, i, W.at(i, j));
+    return ret;
+
+}
+
+VectorMapMatrix getVectorProbabilidadesDeSalto(VectorMapMatrix &D, double p) {
+    VectorMapMatrix ret(1, D.cantColumnas());
+    double n = D.cantColumnas();
+    for (unsigned int j=0; j<n; j++) {
+        if (D.at(j,j) != 0)
+            ret.asignar(0, j, (double)((1-p)/n));
+        else
+            ret.asignar(0, j, (double)(1/n));
+    }
+    return ret;
+}
+
+VectorMapMatrix getMatrizIdentidad(uint tamano) {
+    VectorMapMatrix ret(tamano, tamano);
+    for (uint i=0; i<tamano; i++) {
+        ret.asignar(i, i, 1);
+    }
+    return ret;
+}
+
+void mostrar(vector<double> v) {
+    for (int i=0; i<v.size(); i++)
+        cout << v.at(i) << "\n";
+}
+
+double sumar(vector<double> v) {
+    std::sort(v.begin(), v.end());      //Lo ordeno porque se van a sumar solo números positivos, y sumarlos en orden es
+    double suma = 0;                    //la forma más precisa de calcular la suma exacta.
+    for (int i=0; i<v.size(); i++)
+        suma += v[i];
+    return suma;
+}
+
+vector<double> dividir(vector<double> v, double num) {
+    vector<double> ret(v.size());
+    for (int i=0; i<v.size(); i++)
+        ret[i] = v[i]/num;
+    return ret;
+}
+
+vector<double> normalizar(pair<vector<double>,short> ranking) {
+    vector<double> rk = ranking.first;
+    double num = sumar(rk);
+    vector<double> rkNorm = dividir(rk, num);
+    return rkNorm;
+}
+
+/**
+ * Aca implementacion del PageRank
+ * @param matrizDeConectividad la matriz con los links entre las paginas
+ * @return devuelve el ranking.
+ */
+vector<double> pageRank(VectorMapMatrix &W, double probabilidadDeSaltar,string nombreArchivo) {
 	FILE * fp;
-	FILE * fp2;
-
-	fp = fopen ("mediciones.txt", "w+");
-	fp2 = fopen ("mediciones2.txt", "w+");
-
-     
-	VectorMapMatrix mat1 = VectorMapMatrix(5,5);
-	VectorMapMatrix mat2 = VectorMapMatrix(5,5);
-	VectorMapMatrix mat3 = VectorMapMatrix(5,5);
-	std::vector<double> bb(5,1.0);
 	
-	std::vector<vector<int> > mat4(5,vector<int>(5));
-	std::vector<vector<int> > mat5(5,vector<int>(5));
-	std::vector<vector<int> > mat6(5,vector<int>(5));
+	fp = fopen ("Mediciones.txt", "w+");
+    VectorMapMatrix Wt = getTraspuesta(W);
 
-	for(int l=0;l<5;l++){
-		for(int j=0;j<5;j++){
-			mat1.asignar(l,j,20.0+j);
-			mat2.asignar(l,j,20.0);
-			mat4[l][j] = 25+j;
-			mat5[l][j] = 20;
-		}	
-	}
+    VectorMapMatrix D = getMatrizDiagonal(W);
+
+    VectorMapMatrix WD = W*D;
+    
+    VectorMapMatrix DWt = D*Wt;
+
+    WD * probabilidadDeSaltar;
+    
+    DWt * probabilidadDeSaltar;
+
+    VectorMapMatrix I = getMatrizIdentidad(W.cantFilas());
+
+    WD * (-1);
+    
+    DWt * (-1);
+
+    VectorMapMatrix I_pWD = I + WD;
+    
+    VectorMapMatrix I_pDWt = I + DWt;
+
+    vector<double> b(W.cantFilas(), 1);
+
 	
-	pair<vector<double>,short> res = mat1.EG(mat1,bb);
-	
-	for(int l=0;l<5;l++){
-		printf("%f ",res.first[l]);
-	}
-	printf("%d\n",res.second);
-	int acum;
-	for(int h = 0; h < 100; h++){
-		unsigned long start, end;
-	 	RDTSC_START(start);//esto toma tiempos en mult de vector de vectores
-		acum = 0;
-	 	for(unsigned int i=0;i<mat4.size();i++){
-			for(unsigned int j=0;j<mat5[i].size();j++){
-				for(unsigned int k=0;k<mat4.size();k++){
-					acum += mat4[i][k]*mat5[k][j];
-				}
-				mat6[i][j] = acum;
-				acum = 0;
-			}	
-		}
-		RDTSC_STOP(end);
-	 	unsigned long delta = end - start;
+    if (MEDIR) {
+        unsigned long delta = 0;
+        pair<vector<double>,short> ranking;
+        for (int i = 0; i < CANTIDAD_MEDICIONES; i++) {
+            unsigned long start, end;
+            RDTSC_START(start);
+            pair<vector<double>,short> ranking = I_pWD.EG(I_pWD, I_pDWt, b);
+            RDTSC_STOP(end);
+            delta = end - start;
 	 	fprintf(fp,"%lu\n",delta);
-		RDTSC_START(start);//esto toma tiempos en mult de nuestra implementacion de matriz
-		acum = 0;
-		mat3 = mat1*mat2;
-	 	RDTSC_STOP(end);
-	 	delta = end - start;
-	 	fprintf(fp2,"%lu\n",delta);
-	 		
-	}
+        }
+       
+    }
+
+    pair<vector<double>,short> ranking = I_pWD.EG(I_pWD, I_pDWt, b);
+    vector<double> rn = normalizar(ranking);
+    mostrar(rn);
+    return rn;
+}
 
 
-  /*  printf("10 \t 45 \n");
+int main(int argc, char * argv[]) {
 
-    Matriz A(2, 2);
-    A.set(0, 0, 10);
-	A.set(0, 1, 13);
-	A.set(1, 0, 4);
-	A.set(1, 1, 6);
+    if (argc != 3) {
+        cout << "Modo de uso: tp1 archivo p\n";
+    } else {
+        string nombreArchivo = argv[1];
 
-	Matriz B(2, 2);
-	B.set(0, 0, 3);
-	B.set(0, 1, 10);
-	B.set(1, 0, 1);
-	B.set(1, 1, 0);
+        double probabilidadDeSaltar = atof(argv[2]);
 
+        VectorMapMatrix matrizDeConectividad = leerMatriz(nombreArchivo);
 
-	unsigned long start, end;
-	unsigned long startm, endm;
-	RDTSC_START(start);
-	Matriz suma = A + B;
-	RDTSC_STOP(end);
-	unsigned long delta = end - start;
+        vector<double> ranking = pageRank(matrizDeConectividad, probabilidadDeSaltar,nombreArchivo);
 
-	RDTSC_START(startm);
-	Matriz multiplicacion = A * B;
-	RDTSC_STOP(endm);
-	unsigned long deltam = endm - startm;
+        escribirRanking(nombreArchivo + ".out", ranking, probabilidadDeSaltar);
+    }
 
-	printf("el resultado de la suma (%ul): \n", delta);
-	cout << suma;
-	printf("\n el resultado de la multiplicación (%ul): \n", delta);
-	cout << multiplicacion;*/
     return 0;
 }
 
