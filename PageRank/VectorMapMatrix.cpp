@@ -40,7 +40,7 @@ double& VectorMapMatrix::operator[](pair<uint, uint> p) {
 }
 
 VectorMapMatrix VectorMapMatrix::operator+(VectorMapMatrix const &B) {
-    unsigned int f = 0;
+    /*unsigned int f = 0;
     unsigned int c = 0;
     if(cantFilas() == B.cantFilas() and cantColumnas() == B.cantColumnas()) {
         VectorMapMatrix result(cantFilas(), cantColumnas());
@@ -56,7 +56,7 @@ VectorMapMatrix VectorMapMatrix::operator+(VectorMapMatrix const &B) {
     } else {
         VectorMapMatrix result; //no se puede operar, devuelvo matriz 0x0.
         return result;
-    }
+    }*/
     if(cantFilas() == B.cantFilas() and cantColumnas() == B.cantColumnas()) {
         VectorMapMatrix result(cantFilas(), cantColumnas());
         map<uint, double>::const_iterator it1 = m[0].begin();
@@ -64,10 +64,10 @@ VectorMapMatrix VectorMapMatrix::operator+(VectorMapMatrix const &B) {
         uint f = 0;
         while (f < cantFilas()) {
             while(it1 != m[f].end() or it2 != B.m[f].end()) {
-                if (it2 == B.m[f].end() or it1->first < it2->first){
+                if (it2 == B.m[f].end() or (it1 != m[f].end() and it1->first < it2->first)){
                     result.asignar(f, it1->first, it1->second); // B tiene un valor nulo, solo coloco el valor de A.
                     it1++;
-                } else if (it1 == m[f].end() or it1->first > it2->first) {
+                } else if (it1 == m[f].end() or (it2 != B.m[f].end() and it1->first > it2->first)) {
                     result.asignar(f, it2->first, it2->second); // A tiene un valor nulo, solo coloco el valor de B.
                     it2++;
                 } else {
@@ -86,7 +86,7 @@ VectorMapMatrix VectorMapMatrix::operator+(VectorMapMatrix const &B) {
         return result;
     }
 }
-/*
+
 VectorMapMatrix VectorMapMatrix::operator*(const VectorMapMatrix &B) {
     if(cantColumnas() == B.cantFilas()) {
         VectorMapMatrix result(cantFilas(), B.cantColumnas());
@@ -121,10 +121,10 @@ VectorMapMatrix VectorMapMatrix::operator*(const VectorMapMatrix &B) {
         }
         return result;
     } else {
-        return VectorMapMatrix(); //No existe solución.
+        return VectorMapMatrix(); //No está definida la multiplicación.
     }
 }
-*/
+/*
 VectorMapMatrix VectorMapMatrix::operator*(const VectorMapMatrix &B){
     if(cantColumnas() == B.cantFilas()) {
         VectorMapMatrix result(cantFilas(), B.cantColumnas());
@@ -148,7 +148,7 @@ VectorMapMatrix VectorMapMatrix::operator*(const VectorMapMatrix &B){
     } else {
         return VectorMapMatrix(); //No está definida la multiplicación.
     }
-}
+}*/
 
 vector<double> VectorMapMatrix::operator*(const vector<double>& v){
     VectorMapMatrix vect_como_matriz(v.size(), 1);
