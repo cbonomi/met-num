@@ -4,10 +4,10 @@ import os
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+#import seaborn as sns
 from random import randrange
 from decimal import Decimal
 from __future__ import division
-
 ##------------Configuracion------------------------------------------------------##
 path_dir_de_trabajo = '/home/christian/'
 path_entradas = path_dir_de_trabajo + 'entradas/'
@@ -30,7 +30,7 @@ def getArcoAleatorio(grafo):
    
 def generar_grafo_con_cantidad_de_nodos(densidad, cantidad_de_nodos):
     grafo = np.zeros((cantidad_de_nodos, cantidad_de_nodos))  # Matriz de ceros
-    cantidad_maxima_de_arcos = cantidad_de_nodos ** 2
+    cantidad_maxima_de_arcos = cantidad_de_nodos * (cantidad_de_nodos - 1)
     
     cantidad_de_arcos = 0
     promedio_de_arcos = 0
@@ -92,10 +92,10 @@ def generar_grafo_aleatorio(cantidad_nodos, probabilidad_de_link):
 # 'nombre_archivo_entrada' es el path y el prefijo con el que va a generar los nombres de los 
 # archivos de entrada, a esos prefijos les va a concatenar la cantidad de páginas que tiene
 # el grafo de páginas. Agregue el parametro paso que indica la cantidad de nodos en que crece el grafo.
-def generar_entradas(nombre_archivo_entrada, generador_de_grafos, parametro_fijo, parametro_variable, paso):       
+def generar_entradas(path, generador_de_grafos, parametro_fijo, parametro_variable, paso):       
     for i in range(paso, parametro_variable, paso):
         grafo = generador_de_grafos(parametro_fijo, i)
-        f =open(nombre_archivo_entrada + str(i).zfill(5), 'w')
+        f =open(path + "entrada" + str(i).zfill(5), 'w')
         salida = generar_salida_matriz(grafo);
         f.write(salida.encode('utf8'))
         f.close()
@@ -125,27 +125,30 @@ def escribir_salidas(nombre_archivo_entrada, nombre_archivo_salida):
 
 ##---------Tomamos mediciones utilizando la entrada generada previamente y las guardamos---------##
 
-def tomarMediciones(nombre_archivo_entrada, generador_de_grafos, parametro_fijo, parametro_variable, paso, nombre_archivo_mediciones):    
-    o=os.popen('rm ' + path_entradas + '*.out')
-    #generar_grafos_por_densidad(cantidad_de_nodos, densidad_maxima, paso)
-    generar_entradas(nombre_archivo_entrada, generador_de_grafos, parametro_fijo, parametro_variable, paso)    
-    o=os.popen('ls ' + path_entradas).read()
+def tomarMediciones(path, generador_de_grafos, parametro_fijo, parametro_variable, paso):    
+    cantidad_mediciones = 20
+    os.popen('mkdir ' + path_dir_de_trabajo + path)
+    os.popen('mkdir ' + path_dir_de_trabajo + path + "mediciones/")
+    os.popen('rm ' + path_dir_de_trabajo + path + '*')
+    generar_entradas(path_dir_de_trabajo + path, generador_de_grafos, parametro_fijo, parametro_variable, paso)    
+    o=os.popen('ls ' + path_dir_de_trabajo + path).read()
     
     nombres = o.splitlines()
-
-    f =open(nombre_archivo_mediciones, 'w')
+    f = open(path_dir_de_trabajo + path + "mediciones/mediciones.csv", 'w')
     f.write('cantidad de nodos, ciclos de reloj \n')
     a = [len(nombres)]
     i = 1
     medicion = 0
     for nombre in nombres:
-        i = i + 1
-        for j in range(1, 20):
-            medicion = medicion + Decimal(os.popen(path_dir_de_trabajo + nombre_page_rank + ' ' +  path_entradas + nombre + ' ' + probabilidad_de_salto).read())
-        f.write(str(i*paso) + ',' + str(medicion / 20) + '\n')
+        if (nombre != 'mediciones'):
+            print('procesando ' + path + nombre + '...\n')
+            i = i + 1
+            for j in range(1, cantidad_mediciones):
+                medicion = medicion + Decimal(os.popen(path_dir_de_trabajo + nombre_page_rank + ' ' +  path_dir_de_trabajo + path + nombre + ' ' + probabilidad_de_salto).read())
+            f.write(str(i*paso) + ',' + str(medicion / cantidad_mediciones) + '\n')
     f.close()
 
-    df = pd.read_csv(nombre_archivo_mediciones)
+    df = pd.read_csv(path_dir_de_trabajo + path + "mediciones/mediciones.csv")
 
     df.head()
     
@@ -153,42 +156,80 @@ def tomarMediciones(nombre_archivo_entrada, generador_de_grafos, parametro_fijo,
 ##---------Tomamos mediciones utilizando la entrada generada previamente---------##
 
 ##---------Generamos el grafico a partir de las mediciones-----------------------##
-def graficar(nombre_archivo_mediciones, nombre_grafico_medicion, titulo, tipo_de_grafico):
-    df = pd.read_csv(nombre_archivo_mediciones)
-    
-    #x = df[df.columns[0]]
-    #y = df[df.columns[1]]
-    #grafico_mediciones = plt.plot(x,y)
+def reject_outliers(datos1, datos2):
+    m = 2
+    u = np.mean(datos2)
+    s = np.std(datos2)
+    i = 0
+    indices = []
+    filtrados = []
+    for e in datos2: 
+        i = i+1
+        if (u - 2 * s < e < u + 2 * s):
+            indices.append(datos1[i])
+            filtrados.append(e)
+    return [indices, filtrados]
 
+def juntarMediciones(mediciones):
+    meds = []
+    i = 1
+    for medicion in mediciones: 
+        df = pd.read_csv(path_dir_de_trabajo + medicion[0] + "mediciones/mediciones.csv")
+        df.columns = [df.columns[0], medicion[1]]
+        meds.append(df[df.columns[1]])
+    return meds
     
-    grafico_mediciones = df.plot(kind=tipo_de_grafico)
-    fig = grafico_mediciones.get_figure()
+def graficar(mediciones, titulo, labelx, labely, tipo_de_grafico):
+    #plt.gcf().clear()
+    fig1 = plt.gcf() 
+    df = pd.read_csv(path_dir_de_trabajo + mediciones[0][0] + "mediciones/mediciones.csv")
+    
+    med = juntarMediciones(mediciones)
+
     plt.title(titulo)
-    plt.xlabel(df.columns[0])
-    plt.ylabel(df.columns[1])
-    plt.grid(True)
+    plt.xlabel(labelx)
+    plt.ylabel(labely)
+    
+    for medicion in med: 
+        y = medicion
+        plt.plot(df[df.columns[0]], y)
 
+    ax = plt.subplot(111)
+    ax.legend()
+    plt.grid(True)
     plt.show()
-    fig.savefig(nombre_archivo_grafico_medicion)
+    plt.draw()
+    fig1.savefig(path_dir_de_trabajo + "CLionProjects/mediciones.png", dpi=100)
 ##---------Generamos el grafico a partir de las mediciones-----------------------##
 
 ##--------------Procedimiento general para cualquier grafo-----------------------##
-# 1.- Consta de tres partes creamos un grafo de cualquier forma.
-# 2.- Tomamos las mediciones de este grafo y las guardamos en un archivo.
-# 3.- Creamos un grafico con estas mediciones.
-
-# 1.- generamos un grafo de con cantidad maxima de paginas = 20 y probabilidad de link entre los nodos i, j 0.3
-#grafo = generar_grafo_aleatorio(100, 0.3)
-# 2.- tomamos mediciones con la entrada pasada en el primer parametro, el grafo en el segundo y con un paso de 10
-#     y guardamos estas mediciones en el archivo de salida indicado en el ultimo parametro.
-#tomarMediciones(path_dir_de_trabajo + 'entradas/entrada', generar_grafo_con_densidad, 200, 50, 10, path_dir_de_trabajo + 'mediciones2.csv')
-# 3.- graficamos las mediciones del archivo pasado como parametro, y la guardamos en el archivo pasado como segundo
-#     parametro, el tipo de grafico que queremos se lo indicamos con el tercer parameto.
-#graficar(path_dir_de_trabajo + 'mediciones2.csv', path_dir_de_trabajo + 'mediciones.png', 'Medicion en ciclos de reloj', 'line')
 
 
-tomarMediciones(path_dir_de_trabajo + 'entradas/entrada_cant_nodos', generar_grafo_con_cantidad_de_nodos, 20, 100, 10, path_dir_de_trabajo + 'mediciones_cant_nodos.csv')
-graficar(path_dir_de_trabajo + 'mediciones_cant_nodos.csv', path_dir_de_trabajo + 'mediciones_cant_nodos.png', 'Medicion en ciclos de reloj', 'line')
+#tomarMediciones(path_dir_de_trabajo + 'entradas/entrada_cant_nodos', generar_grafo_con_cantidad_de_nodos, 20, 200, 10, path_dir_de_trabajo + 'mediciones_cant_nodos.csv')
 
+#tomarMediciones('entradas_densidad_20/', generar_grafo_con_cantidad_de_nodos, 20, 500, 10)
+#tomarMediciones('entradas_densidad_40/', generar_grafo_con_cantidad_de_nodos, 40, 500, 10)
+#tomarMediciones('entradas_densidad_80/', generar_grafo_con_cantidad_de_nodos, 80, 500, 10)
+#tomarMediciones('entradas_densidad_100/', generar_grafo_con_cantidad_de_nodos, 100, 500, 10)
 
+#mediciones = [['entradas_densidad_20/', 'densidad 20%'], 
+#              ['entradas_densidad_40/', 'densidad 40%'],
+#              ['entradas_densidad_80/', 'densidad 80%'],
+#              ['entradas_densidad_100/', 'densidad 100%']]
+
+#getMediciones(mediciones)
+
+#graficar(mediciones, 'Medicion', 'cantidad de nodos', 'ciclos de reloj', 'line')
+
+tomarMediciones('entradas_cantidad_nodos_50/', generar_grafo_con_densidad, 50, 100, 10)
+tomarMediciones('entradas_cantidad_nodos_150/', generar_grafo_con_densidad, 150, 100, 10)
+tomarMediciones('entradas_cantidad_nodos_250/', generar_grafo_con_densidad, 250, 100, 10)
+tomarMediciones('entradas_cantidad_nodos_500/', generar_grafo_con_densidad, 500, 100, 10)
+
+mediciones = [['entradas_cantidad_nodos_50/', 'cantidadd de nodos 50'], 
+              ['entradas_cantidad_nodos_150/', 'cantidad de nodos 150'],
+              ['entradas_cantidad_nodos_250/', 'cantidad de nodos 250'],
+              ['entradas_cantidad_nodos_500/', 'cantidad de nodos 500']]
+
+graficar(mediciones, 'Medicion', 'densidad en %', 'ciclos de reloj', 'line')
 
