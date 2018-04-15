@@ -206,25 +206,11 @@ pair<vector<double>,short> VectorMapMatrix::EG(const VectorMapMatrix& thisTransp
 
 
 	for(f1 = 0; f1 < A.cantFilas()-1; f1++){ //itero sobre las filas, y elimino el resto de las filas respecto de f1. La última no es necesario.
-		/*for(f2 = f1; f2 < A.cantFilas(); f2++){ //itero sobre las filas desde f1 en adelante, estaria por fijarme si tengo que hacer o no calculo en el paso f1 de la EG
-			if(abs(A.at(f2,f1)) > 0.00001){ //si no hay un 0 en la posicion f2,f1
-				cont = true;
-				if(abs(A.at(f1,f1)) <= 0.00001){
-					A[f1].swap(A[f2]); //cambio de lugar las filas porque habia un 0 en la diagonal pero no en el resto de la columna
-                    double temp = bb[f1];
-                    bb[f1] = bb[f2];         //como se cambiaron de lugar las filas, también se cambian de lugar los valores de "bb"
-                    bb[f2] = temp;
-                }
-				break;
-			}
-		}*/
 		A_kk = A.at(f1,f1); //de la diagonal
 		map<unsigned int, double>::const_iterator it_f2 = A_t[f1].find(f1);
 		it_f2++; //Busco la primera fila que deba eliminarse.
-		while(it_f2 != A_t[f1].end()){ //cálculo del paso f1 si corresponde
+		while(it_f2 != A_t[f1].end()){
 			f2 = it_f2->first;
-			//if (abs(A_kk) <= 0.00001){break;} //si me tengo que saltear este paso no calculo nada
-			//if(it_f2 != A[f2].end() && it_f2->first == f1){//si el elemento f2,f1 es 0 no hago nada en la fila f2
             A_f2k = A.at(f2,f1); // el de la fila a eliminar en la columna donde pondriamos 0.
 			map<unsigned int, double>::const_iterator it_c = A[f1].find(f1);
 
@@ -243,14 +229,6 @@ pair<vector<double>,short> VectorMapMatrix::EG(const VectorMapMatrix& thisTransp
 
             it_f2++; //} //A_f2k y A_kk son los valores que determinan a las matrices Mk que uso para llegar desde A a U, sabiendo que PA = LU
 		}
-		/*if(cont){
-			A = Mk*A;
-			for(f2 = f1 + 1; f2 < A.cantFilas(); f2++){ //revierto la matriz Mk a I
-				Mk.asignar(f2,f1,0.0);
-			}
-			cont = false;
-		}*/
-		
 	}
 	for(f1 = A.cantFilas()-1; f1 < A.cantFilas(); f1--){
 		if(A.at(f1,f1) == 0 && bb[f1] != 0){
@@ -262,15 +240,13 @@ pair<vector<double>,short> VectorMapMatrix::EG(const VectorMapMatrix& thisTransp
 			res[f1] = 0;
 		}
 		else{
-			res[f1] = bb[f1];
-			
-			if (f1!=A.cantFilas()-1){
-				for(unsigned int l = A.cantFilas()-1; l > f1; l--){
-					res[f1] -= res[l]*A.at(f1,l); //esto es importante, al res le resto todos los valores ya hallados, multiplicados por los coeficientes de la ecuacion en f1.
-				}
-			}
+            res[f1] = bb[f1]/A.at(f1,f1);
 
-            res[f1] /= A.at(f1,f1); //tengo finalmente divido por el coeficiente que tengo en la diagonal, para hallar el resultado en f1.
+            if (f1!=0){
+                for(unsigned int l = 0; l < f1; l++){
+                    bb[l] -= res[f1]*A.at(l,f1); //Acá, lo que hacemos es restar a todas las "ecuaciones" el valor que acabamos de hallar en res. Y así hallando todos los valores.
+                }
+            }
 		}
 	}
 	return make_pair(res,status);
