@@ -63,7 +63,7 @@ VectorMapMatrix VectorMapMatrix::operator+(VectorMapMatrix const &B) {
         map<uint, double>::const_iterator it2 = B.m[0].begin();
         uint f = 0;
         while (f < cantFilas()) {
-            while(it1 != m[f].end() or it2 != B.m[f].end()) {
+            while(it1 != m[f].end() and it2 != B.m[f].end()) {
                 if (it2 == B.m[f].end() or it1->first < it2->first){
                     result.asignar(f, it1->first, it1->second); // B tiene un valor nulo, solo coloco el valor de A.
                     it1++;
