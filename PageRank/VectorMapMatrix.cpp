@@ -40,29 +40,29 @@ double& VectorMapMatrix::operator[](pair<uint, uint> p) {
 }
 
 VectorMapMatrix VectorMapMatrix::operator+(VectorMapMatrix const &B) {
-//    unsigned int f = 0;
-//    unsigned int c = 0;
-//    if(cantFilas() == B.cantFilas() and cantColumnas() == B.cantColumnas()) {
-//        VectorMapMatrix result(cantFilas(), cantColumnas());
-//        while (f < cantFilas()) {
-//            while (c < cantColumnas()) {
-//                result.asignar(f, c, at(f, c) + B.at(f, c));
-//                c++;
-//            }
-//            c=0;
-//            f++;
-//        }
-//        return result;
-//    } else {
-//        VectorMapMatrix result; //no se puede operar, devuelvo matriz 0x0.
-//        return result;
-//    }
+    unsigned int f = 0;
+    unsigned int c = 0;
     if(cantFilas() == B.cantFilas() and cantColumnas() == B.cantColumnas()) {
         VectorMapMatrix result(cantFilas(), cantColumnas());
+        while (f < cantFilas()) {
+            while (c < cantColumnas()) {
+                result.asignar(f, c, at(f, c) + B.at(f, c));
+                c++;
+            }
+            c=0;
+            f++;
+        }
+        return result;
+    } else {
+        VectorMapMatrix result; //no se puede operar, devuelvo matriz 0x0.
+        return result;
+    }
+    if(cantFilas() == B.cantFilas() and cantColumnas() == B.cantColumnas()) {
+        VectorMapMatrix result(cantFilas(), cantColumnas());
+        map<uint, double>::const_iterator it1 = m[0].begin();
+        map<uint, double>::const_iterator it2 = B.m[0].begin();
         uint f = 0;
         while (f < cantFilas()) {
-            map<uint, double>::const_iterator it1 = m[f].begin();
-            map<uint, double>::const_iterator it2 = B.m[f].begin();
             while(it1 != m[f].end() and it2 != B.m[f].end()) {
                 if (it2 == B.m[f].end() or it1->first < it2->first){
                     result.asignar(f, it1->first, it1->second); // B tiene un valor nulo, solo coloco el valor de A.
@@ -175,10 +175,11 @@ void VectorMapMatrix::operator*(double valor) {
 }
 /*
 VectorMapMatrix VectorMapMatrix::triangularMatriz() {}
-VectorMapMatrix VectorMapMatrix::permutx(cantFilas(),width);
+
+VectorMapMatrix VectorMapMatrix::permutar(unsigned int j, unsigned int i){
+	VectorMapMatrix p = VectorMapMatrix(cantFilas(),width);
 	for (unsigned int k = 0; k<cantFilas(); k++){ //genero la matriz de permutacion
-		if (k!=i && k!=j){ar(unsigned int j, unsigned int i){
-	VectorMapMatrix p = VectorMapMatri
+		if (k!=i && k!=j){
 			p.asignar(k, k, 1);
 		} else if (k==i){
 			p.asignar(j, k, 1);
@@ -224,18 +225,20 @@ pair<vector<double>,short> VectorMapMatrix::EG(const VectorMapMatrix &mat, const
 			//if (abs(A_kk) <= 0.00001){break;} //si me tengo que saltear este paso no calculo nada
 			//if(it2 != copy[j].end() && it2->first == i){//si el elemento j,i es 0 no hago nada en la fila j
 			if (i!=j){
-                A_jk = copy.at(j,i);
-                map<unsigned int, double>::const_iterator it1 = copy[i].find(i);
-                while(it1 != copy[i].end()){
-                    l = it1->first;
-                    if(i!=l){
-                        copy.asignar(j,l,copy.at(j,l)-(copy.at(i,l)*A_jk/A_kk));
-                        copy2.asignar(l,j,copy.at(j,l));
-                    }
-                    it1++;
-                }
-                bb[j] -= A_jk/A_kk*bb[i];
-			} //no me olvido de actualizar el vector b
+			A_jk = copy.at(j,i);
+			map<unsigned int, double>::const_iterator it1 = copy[i].find(i);
+			while(it1 != copy[i].end()){				
+				l = it1->first;
+				
+				if(i!=l){
+					copy.asignar(j,l,copy.at(j,l)-(copy.at(i,l)*A_jk/A_kk));
+					copy2.asignar(l,j,copy.at(j,l));
+				}
+					
+					
+				it1++;
+			}
+			bb[j] -= A_jk/A_kk*bb[i];} //no me olvido de actualizar el vector b
 			it2++;
 			//} //A_jk y A_kk son los valores que determinan a las matrices Mk que uso para llegar desde A a U, sabiendo que PA = LU
 		}
@@ -328,64 +331,6 @@ pair<vector<double>,short> VectorMapMatrix::EGPP(vector<double> bb) {
     }
     return make_pair(res,status);
 }
-
-pair<vector<double>,short> VectorMapMatrix::EG_particuar(vector<double> bb) {
-    unsigned int i,j;
-    vector<double> res(width);
-    short status = 0; //status default, el sistema tiene una unica solucion posible
-    VectorMapMatrix copy = VectorMapMatrix(*this);
-    for(i = 0; i < copy.cantFilas()-1; i++){ //itero sobre las filas, excepto la ultima porque ahi no tengo que hacer nada
-        double maximo_abs = 0;    //en cada iteración es igual al número más grande (en valor absoluto) del resto de la columna.
-        unsigned int fila_del_maximo;
-        list<pair<uint, double> > filas_a_ser_restadas;
-        auto iter_de_la_lista_apuntando_al_maximo = filas_a_ser_restadas.begin();
-        for(j = i; j < copy.cantFilas(); ++j){ //itero sobre las filas desde i+1 en adelante, para encontrar el valor de "maximo_abs".
-            // De paso me guardo las filas en las que encuentro un valor != 0 en la columna "i" y me guardo dicho valor.
-            map<unsigned int, double>::const_iterator iter = copy[j].find(i);
-            if (iter != copy[j].cend()){    //Si el valor está definido, ie, es != 0:
-                const double& a_ji = iter->second;        //lo llamo a_ji y...
-                filas_a_ser_restadas.emplace_back(j, a_ji);  //guardo la fila en la que está y su valor.
-                if(abs(a_ji) > abs(maximo_abs)){ //busco el máximo en valor absoluto
-                    maximo_abs = a_ji;
-                    fila_del_maximo = j;
-                    iter_de_la_lista_apuntando_al_maximo = --filas_a_ser_restadas.end(); //El máximo es el último agregado.
-                }
-            }
-        }
-        if(maximo_abs != 0) {    //Si el resto de la columna son todos 0´s (maximo == 0) no necesito hacer más nada. Si hay algún valor no nulo:
-            copy[i].swap(copy[fila_del_maximo]); //cambio de lugar las filas para que a_ii sea el número con valor absoluto más grande.
-            swap(bb[i], bb[fila_del_maximo]);                  //como se cambiaron de lugar las filas, también se cambian de lugar los valores de "bb"
-            filas_a_ser_restadas.erase(iter_de_la_lista_apuntando_al_maximo);//También debo sacar de la lista de filas a restar, aquella que contiene al máximo y...
-            if (filas_a_ser_restadas.begin()->first == i)    //si la fila "i" está en la lista...
-                filas_a_ser_restadas.begin()->first = fila_del_maximo;    //debe actualizarse el índice de su fila (pues la swapé).
-            double& a_ii = maximo_abs;
-            for (auto iter_lista = filas_a_ser_restadas.begin(); iter_lista != filas_a_ser_restadas.end(); ++iter_lista) {
-                double& a_ji = iter_lista->second;
-                copy.resta_de_filas(iter_lista->first, a_ji/a_ii, i);
-                bb[iter_lista->first] -= (a_ji/a_ii)*bb[i];
-            }
-        }
-    }
-    for(i = 0; i < copy.cantFilas(); i++){
-        j = copy.cantFilas()-1-i;
-        double a_jj = copy.at(j,j);
-        if(a_jj == 0 && bb[j] != 0){
-            status = -1; //El sistema es incompatible.
-            break;
-        }
-        if(a_jj == 0 && bb[j] == 0){
-            status = 1; //Hay infinitos resultados.
-            res[j] = 0;
-        }
-        else{
-            res[j] = bb[j]/a_jj; //Tengo a_jj*x_j = b_j, paso dividiendo el a_jj
-            for(unsigned int l = 0; l < j; l++){    //Esto es importante, al b_l con l de 0 a j-1 le paso restando el a_lj*x_j, porque ya conozco...
-                bb[l] -= res[j]*copy.at(l,j);  //el resultado de x_j, de forma que en la siguiente iteracion solo voy a tener algo de esta pinta A_jj*x_j = b_j
-            }
-        }
-    }
-    return make_pair(res,status);
-};
 
 void VectorMapMatrix::resta_de_filas(uint fila_a_modificar, double escalar, uint fila_para_restar){
     if(escalar != 0){   //Si el escalar es 0 no hago nada.
