@@ -12,7 +12,8 @@ using namespace std;
 
 
 bool MEDIR = true;
-unsigned int CANTIDAD_MEDICIONES = 20;
+
+unsigned int CANTIDAD_MEDICIONES = 1;
 
 
 VectorMapMatrix getMatrizDiagonal(VectorMapMatrix &W) {
@@ -106,7 +107,7 @@ vector<double> pageRank(VectorMapMatrix &W, double probabilidadDeSaltar) {
     VectorMapMatrix I = getMatrizIdentidad(W.cantFilas());
 
     WD * (-1);
-    
+
     DWt * (-1);
 
     VectorMapMatrix I_pWD = I + WD;
@@ -115,7 +116,6 @@ vector<double> pageRank(VectorMapMatrix &W, double probabilidadDeSaltar) {
 
     vector<double> b(W.cantFilas(), 1);
 
-	
     //if (MEDIR) {
         //unsigned long delta = 0;
         //pair<vector<double>,short> ranking;
