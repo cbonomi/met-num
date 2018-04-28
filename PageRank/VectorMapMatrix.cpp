@@ -1,6 +1,5 @@
 #include "VectorMapMatrix.h"
 #include <cmath>
-#include <math.h>
 #include <list>
 #include <utility>
 #include <sstream>
@@ -40,7 +39,7 @@ double& VectorMapMatrix::operator[](pair<uint, uint> p) {
 }
 
 VectorMapMatrix VectorMapMatrix::operator+(VectorMapMatrix const &B) {
-    unsigned int f = 0;
+    /*unsigned int f = 0;
     unsigned int c = 0;
     if(cantFilas() == B.cantFilas() and cantColumnas() == B.cantColumnas()) {
         VectorMapMatrix result(cantFilas(), cantColumnas());
@@ -56,18 +55,18 @@ VectorMapMatrix VectorMapMatrix::operator+(VectorMapMatrix const &B) {
     } else {
         VectorMapMatrix result; //no se puede operar, devuelvo matriz 0x0.
         return result;
-    }
+    }*/
     if(cantFilas() == B.cantFilas() and cantColumnas() == B.cantColumnas()) {
         VectorMapMatrix result(cantFilas(), cantColumnas());
         map<uint, double>::const_iterator it1 = m[0].begin();
         map<uint, double>::const_iterator it2 = B.m[0].begin();
         uint f = 0;
         while (f < cantFilas()) {
-            while(it1 != m[f].end() and it2 != B.m[f].end()) {
-                if (it2 == B.m[f].end() or it1->first < it2->first){
+            while(it1 != m[f].end() or it2 != B.m[f].end()) {
+                if (it2 == B.m[f].end() or (it1 != m[f].end() and it1->first < it2->first)){
                     result.asignar(f, it1->first, it1->second); // B tiene un valor nulo, solo coloco el valor de A.
                     it1++;
-                } else if (it1 == m[f].end() or it1->first > it2->first) {
+                } else if (it1 == m[f].end() or (it2 != B.m[f].end() and it1->first > it2->first)) {
                     result.asignar(f, it2->first, it2->second); // A tiene un valor nulo, solo coloco el valor de B.
                     it2++;
                 } else {
@@ -86,6 +85,7 @@ VectorMapMatrix VectorMapMatrix::operator+(VectorMapMatrix const &B) {
         return result;
     }
 }
+
 /*
 VectorMapMatrix VectorMapMatrix::operator*(const VectorMapMatrix &B) {
     if(cantColumnas() == B.cantFilas()) {
@@ -198,11 +198,6 @@ pair<vector<double>,short> VectorMapMatrix::EG(const VectorMapMatrix &mat, const
 	double A_kk, A_jk;
 	VectorMapMatrix copy = VectorMapMatrix(mat);
 	VectorMapMatrix copy2 = VectorMapMatrix(mat2);
-	//VectorMapMatrix Mk = VectorMapMatrix(cantFilas(),width);
-	//bool cont = false; //el bool da es false si en toda la columna de i en adelante es 0, es decir me tengo que saltear este paso
-	/*for(i = 0; i < copy.cantFilas(); i++){
-		Mk.asignar(i,i,1.0);
-	}*/
 
 
 	for(i = 0; i < copy.cantFilas()-1; i++){ //itero sobre las filas, excepto la ultima porque ahi no tengo que hacer nada
