@@ -90,9 +90,7 @@ vector<double> normalizar(pair<vector<double>,short> ranking) {
  * @param matrizDeConectividad la matriz con los links entre las paginas
  * @return devuelve el ranking.
  */
-vector<double> pageRank(VectorMapMatrix &W, double probabilidadDeSaltar) {
-
-    VectorMapMatrix Wt = getTraspuesta(W);
+vector<double> pageRank(VectorMapMatrix &W, VectorMapMatrix &Wt, double probabilidadDeSaltar) {
 
     VectorMapMatrix D = getMatrizDiagonal(W);
 
@@ -100,15 +98,11 @@ vector<double> pageRank(VectorMapMatrix &W, double probabilidadDeSaltar) {
     
     VectorMapMatrix DWt = D*Wt;
 
-    WD * probabilidadDeSaltar;
+    WD * (-probabilidadDeSaltar);
     
-    DWt * probabilidadDeSaltar;
+    DWt * (-probabilidadDeSaltar);
 
     VectorMapMatrix I = getMatrizIdentidad(W.cantFilas());
-
-    WD * (-1);
-
-    DWt * (-1);
 
     VectorMapMatrix I_pWD = I + WD;
     
@@ -146,9 +140,9 @@ int main(int argc, char * argv[]) {
 
         double probabilidadDeSaltar = atof(argv[2]);
 
-        VectorMapMatrix matrizDeConectividad = leerMatriz(nombreArchivo);
+        pair<VectorMapMatrix, VectorMapMatrix> matrizDeConectividad = leerMatrizYMatrizTraspuesta(nombreArchivo);
 
-        vector<double> ranking = pageRank(matrizDeConectividad, probabilidadDeSaltar);
+        vector<double> ranking = pageRank(matrizDeConectividad.first, matrizDeConectividad.second, probabilidadDeSaltar);
 
         escribirRanking(nombreArchivo + ".out", ranking, probabilidadDeSaltar);
     }

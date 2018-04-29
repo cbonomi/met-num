@@ -4,7 +4,7 @@
 
 using namespace std;
 
-VectorMapMatrix leerMatriz(string nombreArchivo) {
+pair<VectorMapMatrix, VectorMapMatrix> leerMatrizYMatrizTraspuesta(string nombreArchivo) {
     fstream entrada(nombreArchivo, ios_base::in);
 
     int cantidadTotalDePaginas;
@@ -13,18 +13,20 @@ VectorMapMatrix leerMatriz(string nombreArchivo) {
 
     entrada >> cantidadTotalDePaginas >> cantidadTotalDeLinks;
 
-    VectorMapMatrix ret(cantidadTotalDePaginas, cantidadTotalDePaginas);
+    VectorMapMatrix matriz(cantidadTotalDePaginas, cantidadTotalDePaginas);
+    VectorMapMatrix matrizTras(cantidadTotalDePaginas, cantidadTotalDePaginas);
 
     int i, j;
 
-    for (int k = 0; k<cantidadTotalDeLinks; k++) {
-        entrada >> i >> j;
-        ret.asignar(j-1, i-1, 1);
+    for (int k = 0; k<cantidadTotalDeLinks; ++k) {
+        entrada >> j >> i;
+        matriz.asignar(i-1, j-1, 1);
+        matrizTras.asignar(j-1, i-1, 1);
     }
 
     entrada.close();
 
-    return ret;
+    return make_pair(matriz, matrizTras);
 }
 
 void escribirRanking(string nombreArchivo, vector<double> ranking, double probabilidadDeSaltar) {

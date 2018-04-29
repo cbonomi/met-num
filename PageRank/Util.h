@@ -3,7 +3,7 @@
 
 #include "VectorMapMatrix.h"
 
-VectorMapMatrix leerMatriz(string nombreArchivo);
+pair<VectorMapMatrix, VectorMapMatrix> leerMatrizYMatrizTraspuesta(string nombreArchivo);
 void escribirRanking(string nombreArchivo, vector<double> ranking, double probabilidadDeSaltar);
 
 #endif
