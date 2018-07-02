@@ -195,7 +195,7 @@ pair<vector<double>,short> VectorMapMatrix::EG(const VectorMapMatrix &mat, const
 	unsigned int i,j,l;
 	vector<double> res(width,0);
 	short status = 0; //status default, el sistema tiene una unica solucion posible
-	double A_kk, A_jk;
+	double A_kk, A_jk, A_kl;
 	VectorMapMatrix copy = VectorMapMatrix(mat);
 	VectorMapMatrix copy2 = VectorMapMatrix(mat2);
 
@@ -220,13 +220,14 @@ pair<vector<double>,short> VectorMapMatrix::EG(const VectorMapMatrix &mat, const
 			//if (abs(A_kk) <= 0.00001){break;} //si me tengo que saltear este paso no calculo nada
 			//if(it2 != copy[j].end() && it2->first == i){//si el elemento j,i es 0 no hago nada en la fila j
 			if (i!=j){
-			A_jk = copy.at(j,i);
+			A_jk = it2->second;
 			map<unsigned int, double>::const_iterator it1 = copy[i].find(i);
 			while(it1 != copy[i].end()){				
 				l = it1->first;
 				
 				if(i!=l){
-					copy.asignar(j,l,copy.at(j,l)-(copy.at(i,l)*A_jk/A_kk));
+					A_kl = it1->second;
+					copy.asignar(j,l,copy.at(j,l)-(A_kl*A_jk/A_kk));
 					copy2.asignar(l,j,copy.at(j,l));
 				}
 					
