@@ -6,6 +6,8 @@
 
 using namespace std;
 
+#define tolerancia 0.000001
+
 class VectorMapMatrix {
 public:
     VectorMapMatrix(); //Construyo una "matriz" de 0x0
