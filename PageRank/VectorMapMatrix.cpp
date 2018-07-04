@@ -191,11 +191,11 @@ VectorMapMatrix VectorMapMatrix::permutar(unsigned int j, unsigned int i){
 }
 */
 
-pair<vector<double>,short> VectorMapMatrix::EG(const VectorMapMatrix &mat, const VectorMapMatrix& mat_tras, vector<double> bb) {
+pair<vector<double>,short> VectorMapMatrix::EG(vector<double> bb) {
     vector<double> res(width,0);
     short status = 0; //status default, el sistema tiene una unica solucion posible
     double A_jj, A_ij;
-    VectorMapMatrix copy = VectorMapMatrix(mat);
+    VectorMapMatrix copy = VectorMapMatrix(*this);
     for(unsigned int j = 0; j < copy.cantColumnas()-1; ++j){ //itero sobre las columnas de copy (que son las filas de copyT), excepto la ultima porque ahi no tengo que hacer nada
         unsigned int i = j; //i: indice de la fila.
         map<uint, double>::iterator it_j = copy[i].begin();
@@ -284,23 +284,25 @@ pair<vector<double>,short> VectorMapMatrix::EG(const VectorMapMatrix &mat, const
     }
     for(long int i = copy.cantFilas()-1; i >= 0; --i){
         auto it = copy[i].begin();
-        if(it->first != i && bb[i] != 0){   //Si el elemento que queda en la diagonal en la fila j es 0 pero bb_j no...
+        A_jj = ((it == copy[i].end() || it->first != i) ? 0 : it->second);
+        if(A_jj) ++it;  //Si A_jj no es 0 avanzo it, pués no forma parte de la siguiente resta.
+        while(it != copy[i].end()){
+            bb[i] -= (it->second)*res[it->first];   //b_i - sum_j(A_ij*x_j)
+            ++it;
+        }
+        if(A_jj == 0 && bb[i] != 0){
             status = -1; //el sistema es incompatible
             break;
-        }else if(it->first != i && bb[i] == 0){   //Si el elemento que queda en la diagonal en la fila j es 0 pero bb_j no...
+        }else if(A_jj == 0 && bb[i] == 0){
             status = 1; //hay infinitos resultados
             res[i] = 0;
         }
-        else{
-            A_jj = it->second;
-            while(++it != copy[i].end())
-                bb[i] -= (it->second)*res[it->first];   //b_i - sum_j(A_ij*x_j)
+        else
             res[i] = bb[i]/A_jj;
             /*res[i] = bb[i]/(it->second); //tengo A_jj*x_j = b_j, paso dividiendo el A_jj
             for(unsigned int l = 0; l < i; ++l){
                 bb[l] -= res[i]*copy.at(l,i); //esto es importante, al b_l con l de 0 a j-1 le paso restando el A_lj*x_j, porque ya conozco el resultado de X_j, de forma que en la siguiente iteracion solo voy a tener algo de esta pinta A_jj*x_j = b_j
             }*/
-        }
     }
     return make_pair(res,status);
 }

@@ -116,7 +116,7 @@ vector<double> pageRank(VectorMapMatrix &W, VectorMapMatrix &Wt, double probabil
         //for (int i = 0; i < CANTIDAD_MEDICIONES; i++) {
             //unsigned long start, end;
             //RDTSC_START(start);
-            pair<vector<double>,short> ranking = I_pWD.EG(I_pWD, I_pDWt, b);
+            pair<vector<double>,short> ranking = I_pWD.EG(b);
            // RDTSC_STOP(end);
             //delta += end - start;
             vector<double> rn = normalizar(ranking);
@@ -124,7 +124,7 @@ vector<double> pageRank(VectorMapMatrix &W, VectorMapMatrix &Wt, double probabil
        // cout << delta / CANTIDAD_MEDICIONES;
     //}
 
-    //pair<vector<double>,short> ranking = I_pWD.EG(I_pWD, b);
+    //pair<vector<double>,short> ranking = I_pWD.EG(b);
     //vector<double> rn = normalizar(ranking);
     //mostrar(rn);
     return rn;
