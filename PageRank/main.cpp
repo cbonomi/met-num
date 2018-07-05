@@ -116,7 +116,7 @@ vector<double> pageRank(VectorMapMatrix &W, VectorMapMatrix &Wt, double probabil
         //for (int i = 0; i < CANTIDAD_MEDICIONES; i++) {
             //unsigned long start, end;
             //RDTSC_START(start);
-            pair<vector<double>,short> ranking = I_pWD.EG(b);
+            pair<vector<double>,short> ranking = I_pWD.EG(I_pWD, b);
            // RDTSC_STOP(end);
             //delta += end - start;
             vector<double> rn = normalizar(ranking);

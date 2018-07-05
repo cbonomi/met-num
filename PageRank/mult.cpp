@@ -124,7 +124,7 @@ vector<double> pageRank(VectorMapMatrix &W, double probabilidadDeSaltar,string n
         for (int i = 0; i < CANTIDAD_MEDICIONES; i++) {
             unsigned long start, end;
             RDTSC_START(start);
-            pair<vector<double>,short> ranking = I_pWD.EG(b);
+            pair<vector<double>,short> ranking = I_pWD.EG(I_pWD, b);
             RDTSC_STOP(end);
             delta = end - start;
 	 	fprintf(fp,"%lu\n",delta);
@@ -132,7 +132,7 @@ vector<double> pageRank(VectorMapMatrix &W, double probabilidadDeSaltar,string n
        
     }
 
-    pair<vector<double>,short> ranking = I_pWD.EG(b);
+    pair<vector<double>,short> ranking = I_pWD.EG(I_pWD, b);
     vector<double> rn = normalizar(ranking);
     mostrar(rn);
     return rn;
