@@ -5,5 +5,6 @@
 
 pair<VectorMapMatrix, VectorMapMatrix> leerMatrizYMatrizTraspuesta(string nombreArchivo);
 void escribirRanking(string nombreArchivo, vector<double> ranking, double probabilidadDeSaltar);
+VectorMapMatrix leerMatriz(string nombreArchivo);
 
 #endif

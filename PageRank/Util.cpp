@@ -39,3 +39,26 @@ void escribirRanking(string nombreArchivo, vector<double> ranking, double probab
 
     salida.close();
 }
+
+VectorMapMatrix leerMatriz(string nombreArchivo) {
+    fstream entrada(nombreArchivo, ios_base::in);
+
+    int cantidadTotalDePaginas;
+    int cantidadTotalDeLinks;
+
+
+    entrada >> cantidadTotalDePaginas >> cantidadTotalDeLinks;
+
+    VectorMapMatrix ret(cantidadTotalDePaginas, cantidadTotalDePaginas);
+
+    int i, j;
+
+    for (int k = 0; k<cantidadTotalDeLinks; k++) {
+        entrada >> i >> j;
+        ret.asignar(j-1, i-1, 1);
+    }
+
+    entrada.close();
+
+    return ret;
+}
